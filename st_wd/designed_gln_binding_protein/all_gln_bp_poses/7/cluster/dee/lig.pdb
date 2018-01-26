@@ -1,0 +1,21 @@
+REMARK AtomGroup GNR_0001
+HETATM    1  OXT GNR Z   1      -1.186  11.634  12.995  1.00 15.00           O
+HETATM    2  HB1 GNR Z   1      -0.173  12.418  16.653  1.00 16.00           H
+HETATM    3  HB2 GNR Z   1       0.520  13.715  15.570  1.00 17.00           H
+HETATM    4  HG1 GNR Z   1       2.743  13.019  16.000  1.00 18.00           H
+HETATM    5  HG2 GNR Z   1       2.198  11.600  16.967  1.00 19.00           H
+HETATM    6 HE21 GNR Z   1       1.395  15.343  18.541  1.00 20.00           H
+HETATM    7 HE22 GNR Z   1       1.303  15.147  16.807  1.00 21.00           H
+HETATM    8  H1  GNR Z   1       1.570  12.627  13.395  1.00 22.00           H
+HETATM    9  H2  GNR Z   1       2.490  11.461  14.204  1.00 23.00           H
+HETATM   10  H3  GNR Z   1       1.396  10.959  13.054  1.00 24.00           H
+HETATM   11  N   GNR Z   1       1.542  11.663  13.813  1.00 25.00           N
+HETATM   12  CA  GNR Z   1       0.544  11.454  14.889  1.00 26.00           C
+HETATM   13  C   GNR Z   1      -0.862  11.374  14.323  1.00 27.00           C
+HETATM   14  O   GNR Z   1      -1.703  10.673  14.916  1.00 28.00           O
+HETATM   15  CB  GNR Z   1       0.624  12.610  15.883  1.00 29.00           C
+HETATM   16  CG  GNR Z   1       1.930  12.634  16.654  1.00 30.00           C
+HETATM   17  CD  GNR Z   1       1.829  13.469  17.908  1.00 31.00           C
+HETATM   18  NE2 GNR Z   1       1.471  14.718  17.725  1.00 32.00           N
+HETATM   19  OE1 GNR Z   1       2.108  13.008  19.028  1.00 33.00           O
+HETATM   20  H01 GNR Z   1       0.768  10.511  15.388  1.00 34.00           H

@@ -277,6 +277,7 @@ def writepdb_and_get_pickle_info(pdb_path, pklout, vdm, comb, origin_atom, plane
         else:
             bb_coords, sc_coords, sc_coords_ON, sc_coords_CS, ifg_coords, ifg_ON_coords, ifg_CS_coords, pdbs, vdmelem1avgdists = y
 
+    print('at line 280')
     for i, bbc, scc, sccon, scccs, ic, icon, iccs, pdb in zip(range(len(bb_coords)), bb_coords, sc_coords, \
             sc_coords_ON, sc_coords_CS, ifg_coords, ifg_ON_coords, ifg_CS_coords, pdbs):
         
@@ -504,13 +505,16 @@ def make_rel_vdm_coords(pdb, comb, origin_atom, plane_atom1, plane_atom2, unflip
     for ifg_sel in ifg_sels:
         coords = np.array([sel.getCoords() for ifg in ifg_sel for sel in ifg])
 
-        coords_ON = [ifg.select('element O N').getCoords() for ifg in ifg_sel
-                              if ifg.select('element O N') is not None][0]
-        coords_CS = [ifg.select('element C S').getCoords() for ifg in ifg_sel
-                              if ifg.select('element C S') is not None][0]
+        try:
+            coords_ON = [ifg.select('element O N').getCoords() for ifg in ifg_sel
+                                  if ifg.select('element O N') is not None][0]
+            coords_CS = [ifg.select('element C S').getCoords() for ifg in ifg_sel
+                                  if ifg.select('element C S') is not None][0]
+            ifg_CS_coords.append(coords_CS)
+            ifg_ON_coords.append(coords_ON)
+        except:
+            pass
         ifg_coords.append(coords)
-        ifg_CS_coords.append(coords_CS)
-        ifg_ON_coords.append(coords_ON)
         for sel, coor in zip(orig_sel, coords):
             sel.setCoords(coor)
         pdbcopies.append(pdbcopy.copy())

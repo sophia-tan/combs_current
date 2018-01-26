@@ -18,6 +18,8 @@ num_atoms['lonepair_imidazole'] = 5
 num_atoms['amino'] = 3
 num_atoms['carboxamide'] = 4
 num_atoms['carboxylate'] = 4
+num_atoms['guanidino'] = 4
+num_atoms['phenyl'] = 6
 
 outpath = '../Lookups/fitted_NN/%s/' %ifg
 try:

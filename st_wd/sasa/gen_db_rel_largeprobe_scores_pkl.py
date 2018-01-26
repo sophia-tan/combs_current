@@ -42,6 +42,5 @@ for _bin in index:
         freq_aai_db = lookup[1][aa]
         score = frac_aai_bin / freq_aai_db
         df.ix[_bin, aa] = round(score,2)
-        print(aa, _bin, score)
 
 pkl.dump(df, open('scores_largeprobe_sasa_%s_lookup.pkl' % aa_source,'wb'))

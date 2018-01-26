@@ -49,6 +49,8 @@ for ix, hist in enumerate([totalhbonds]):
     N = np.cumsum(hist[0])
     N = sum([x<= 0.95*sum(hist[0]) for x in N])
     for count, bond_num in zip(hist[0], hist[1][:-1]):
+        if count == 0:
+            count = 0.01
         score_dict[bond_num] = -np.log10(count/num_ifgs_within_sasa_cutoff / (1/N))
 
     pkl.dump(scores, open('../Lookups/ideal_num_interactions/'+ifg+'_num_interactions_scores.pkl','wb'))

@@ -16,7 +16,7 @@ try:
 except:
     pass
 
-ifg_sele = all_ifgs[ifg]
+ifg_sele = combs.apps.constants.ifg_sele_dict[ifg]
 cb = combs.Comb(ifg_sele)
 
 if ifg=='lonepair_imidazole':

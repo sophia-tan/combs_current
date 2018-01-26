@@ -6,7 +6,7 @@ one_letter_code = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
                    'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
                    'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
                    'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M',
-                   'MSE': 'm', 'ANY': '.', 'APX': '*'}
+                   'MSE': 'm', 'ANY': '.', 'APX': '*', 'GNR':'*'}
 
 three_letter_code = {}
 for k, v in one_letter_code.items():
@@ -62,27 +62,27 @@ interactamer_atoms['PHE']['Aryl'] = ['CZ','CE1', 'CE2']
 interactamer_atoms['PRO']['Pyrrole'] = ['CB', 'CG', 'CD']
 
 
-dict_ = {'LYS': ['CE', 'CD', 'NZ'],
-          'ASP': ['CG', 'OD1', 'OD2'],
-          'PHE': ['CZ', 'CE1', 'CE2'],
-          'ASN': ['CG', 'OD1', 'ND2'],
-          'GLN': ['CD', 'OE1', 'NE2'],
-          'ALA': ['C', 'CA', 'CB'],
-          'ARG': ['CZ', 'NH2', 'NH1'],
-          'THR': ['OG1', 'CB', 'CG2'],
-          'GLY': ['CA', 'N', 'C'],
-          'TYR': ['CZ', 'CE1', 'OH'],
-          'LEU': ['CG', 'CD1', 'CD2'],
-          'VAL': ['CB', 'CG1', 'CG2'],
-          'GLU': ['CD', 'OE1', 'OE2'],
-          'PRO': ['CB', 'CG', 'CD'],
-          'SER': ['CB', 'OG', 'CA'],
-          'CYS': ['CB', 'SG', 'CA'],
-          'MET': ['SD', 'CG', 'CE'],
-          'TRP': ['NE1', 'CD1', 'CE2'],
-          'ILE': ['CG1', 'CD1', 'CG2'],
-          }
-
+#dict_ = {'LYS': ['CE', 'CD', 'NZ'],
+#          'ASP': ['CG', 'OD1', 'OD2'],
+#          'PHE': ['CZ', 'CE1', 'CE2'],
+#          'ASN': ['CG', 'OD1', 'ND2'],
+#          'GLN': ['CD', 'OE1', 'NE2'],
+#          'ALA': ['C', 'CA', 'CB'],
+#          'ARG': ['CZ', 'NH2', 'NH1'],
+#          'THR': ['OG1', 'CB', 'CG2'],
+#          'GLY': ['CA', 'N', 'C'],
+#          'TYR': ['CZ', 'CE1', 'OH'],
+#          'LEU': ['CG', 'CD1', 'CD2'],
+#          'VAL': ['CB', 'CG1', 'CG2'],
+#          'GLU': ['CD', 'OE1', 'OE2'],
+#          'PRO': ['CB', 'CG', 'CD'],
+#          'SER': ['CB', 'OG', 'CA'],
+#          'CYS': ['CB', 'SG', 'CA'],
+#          'MET': ['SD', 'CG', 'CE'],
+#          'TRP': ['NE1', 'CD1', 'CE2'],
+#          'ILE': ['CG1', 'CD1', 'CG2'],
+#          }
+#
 
 flip_names = {'PHE': [('CE1', 'CE2'), ('CD1', 'CD2')],
               'ASP': [('OD1', 'OD2')],
@@ -116,19 +116,22 @@ residue_sc_names = {'ALA': ['CB'], 'CYS': ['CB', 'SG'], 'ASP': ['CB', 'CG', 'OD1
 ifg_sele_dict = {}
 # formatting: if there are multiple ways the atoms can be ordered in the ligand, make a list of dicts (ex: lonepair_imidazole)
 # But if there are >1 of the same ifg in the ligand, have the list of ifgatoms be INSIDE the dict (ex: bakboneCO)
-ifg_sele_dict['carboxamide'] = {'ASN': 'CB CG ND2 OD1', 'GLN': 'CG CD NE2 OE1', 'APX': 'C10 C11 N3 O1'}
-ifg_sele_dict['carboxylate'] = {'ASP': 'CB CG OD2 OD1', 'GLU': 'CG CD OE2 OE1'}
+ifg_sele_dict['carboxamide'] = {'ASN': 'CB CG ND2 OD1', 'GLN': 'CG CD NE2 OE1', 'APX': 'C10 C11 N3 O1', 'GNR': 'CG CD NE2 OE1'}
+ifg_sele_dict['carboxylate'] = {'ASP': 'CB CG OD2 OD1', 'GLU': 'CG CD OE2 OE1', 'GNR': 'CA C OXT O'}
 ifg_sele_dict['imidazole'] = {'HIS': 'CG CD2 NE2 CE1 ND1'}
 ifg_sele_dict['lonepair_imidazole'] = [{'APX': 'C13 N1 N6 C10 C12'}, {'APX':'C12 C10 N6 N1 C13'}, {'APX': 'N1 C13 C12 C10 N6'}, {'APX':'C10 C12 C13 N1 N6'}]
 ifg_sele_dict['indole'] = {'TRP': 'CG CD1 NE1 CE2 CZ2 CH2 CZ3 CE3 CD2'}
 ifg_sele_dict['tyrCOH'] = {'TYR': 'CZ OH'}
 #ifg_sele_dict['backboneCO'] = {'APX': ['C8 O3','C19 O2']}
 ifg_sele_dict['backboneCO'] = {'ANY':'C O'}
-ifg_sele_dict['serineCOH'] = {'SER':'CB OG'}
+ifg_sele_dict['serCOH'] = {'SER':'CB OG'}
 ifg_sele_dict['thrCOH'] = {'THR':'CB OG1'}
-ifg_sele_dict['phenyl'] = {'PHE': 'CG CD1 CD2 CE1 CE2 CZ', 'TYR': 'CG CD1 CD2 CE1 CE2 CZ'}
+#ifg_sele_dict['phenyl'] = {'PHE': 'CG CD1 CD2 CE1 CE2 CZ', 'TYR': 'CG CD1 CD2 CE1 CE2 CZ'}
 ifg_sele_dict['guanidino'] = {'ARG': 'NE CZ NH1 NH2'}
-ifg_sele_dict['amino'] = {'LYS': 'CE NZ'}
+ifg_sele_dict['amino'] = {'LYS': 'CE NZ', 'GNR': 'CA N'}
+ifg_sele_dict['isoleucine'] = {'ILE': 'CB CG1 CG2 CD1'}
+ifg_sele_dict['leucine'] = {'LEU': 'CB CG CD1 CD2'}
+ifg_sele_dict['valine'] = {'VAL': 'CB CG1 CG2'}
 
 
 resname_dict = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',

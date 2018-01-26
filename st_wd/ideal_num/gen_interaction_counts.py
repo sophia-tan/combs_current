@@ -118,4 +118,4 @@ for ls in [water_contacts_ifglevel , hb_contacts_vdmlevel , vdw_contacts_vdmleve
     vdw_contacts_atomlevel, polar_contacts_atomlevel, totalhbond ]:
     megalist.append(ls)
 
-pkl.dump([merged,megalist], open(ifg+'interaction_types_pkl/_interaction_types.pkl','wb'))
+pkl.dump([merged,megalist], open('interaction_types_pkl/%s_interaction_types.pkl'%ifg,'wb'))
