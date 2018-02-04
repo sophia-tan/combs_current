@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 import prody as pr
-from ..apps.constants import one_letter_code
+from ..apps.constants import one_letter_code, ifg_sele_dict, AAname
 from .. import cluster
 #from ..cluster.Interactamer import *
 import traceback
@@ -151,11 +151,6 @@ class Analyze:
         if mode == 'sidechain':
             def func(row):
                 index = [i for i, rrn in enumerate([n for n in row['rel_resnums'] if n != '-']) if rrn == '0']
-                # print(row['rel_resnums'])
-                # print(row['vdM_atom_names'])
-                # print(row['vdM_atom_names'].strip('()').split(') ('))
-                # print(row[['iFG_count','vdM_count']])
-                # print(index)
                 return any([any(
                     {y for names in [row['vdM_atom_names'].strip('()').split(') (')[ind]] for y in names.split() if
                      y not in ['N', 'O', 'H', 'OXT', 'H1', 'H2', 'H3']}) for ind in index])
@@ -226,7 +221,7 @@ def frag_match(seq1, seq2):
         match = 0
         total = len(seq1)
         for i in range(total):
-            if seq1[i] == seq2[i]:
+            if seq1[i] == seq2[i] and seq1[i]!='-':
                 match += 1
         perc = match/total*100
     except:
@@ -265,50 +260,116 @@ def remove_repeat_proteins(orig_df):
     print(len(orig_df), 'num vdms after repeats are removed')
     return orig_df
 
-#AAi_database_lookup = pkl.load(open('fake.pkl','rb'))
-
-
 def drop_rare_aa(df):
     drop_indices = []
     for ix, row in df.iterrows():
-        rare = ['MSE', 'SEP', 'TPO', 'CSO']
-        if row['resname_vdm'] in rare:
+        if row['resname_vdm'] not in one_letter_code.keys():
             drop_indices.append(ix)
     df.drop(drop_indices, axis=0,inplace=True)
     return df
 
-def refine_df(path_to_csv, seq_dist, threefive, repeats_already_removed=False, repeats_removed_df=None,lonepair_imidazole=False):
-    '''filter df by seq_dist, bb/sc, 3.5.
-    Argument seq_dist should be float. threefive should be boolean'''
-    an = Analyze(path_to_csv)
-    if repeats_already_removed==False:
-        dist_vdms = an.get_distant_vdms(seq_distance=seq_dist)
-        dist_vdms = remove_repeat_proteins(dist_vdms)
+
+def add_interactions(ifgs_dir,ifg, ifgs_df):
+    #ifgs_df = ifgs_df[[
+    if ifg == 'lonepair_imidazole':
+        parents = ['HIS']
     else:
-        dist_vdms = repeats_removed_df
+        parents = [x for x in ifg_sele_dict[ifg].keys() if x in AAname.keys()]
+    df_list = [] 
+    for aa in parents:
+        path_to_csv = ifgs_dir+AAname[aa]+'/csv/'
+        an = Analyze(path_to_csv)
+        # add hbond waters
+        hbondwater = an.ifg_hbond_water.rename(columns={'number_hbonds':'water_hbonds'})
+        hbondwater['resname_ifg']=aa
+        hbondwater = hbondwater[['iFG_count', 'water_hbonds','resname_ifg']]
+        merged = pd.merge(ifgs_df,hbondwater,on=['iFG_count','resname_ifg'],how='inner')
 
-    if lonepair_imidazole:
-        dist_vdms = an.get_lonepair_imidazole_ifgs(dist_df = dist_vdms)
+        # add the other stuff
 
-    # add info about ifg-vdm dist from contacts csv and drop rare aa
-    contactsdf = an.ifg_contact_vdm
-    dist_vdms = pd.merge(dist_vdms,contactsdf, on=['iFG_count', 'vdM_count'])
-    dist_vdms = drop_rare_aa(dist_vdms)
-    vdms_bb = dist_vdms[dist_vdms.apply(cluster.Interactamer.has_bb_or_sc, bb_or_sc='bb',threepfive=threefive,axis=1)]
-    vdms_sc = dist_vdms[dist_vdms.apply(cluster.Interactamer.has_bb_or_sc, bb_or_sc='sc',threepfive=threefive,axis=1)]
+        df_list.append(merged)
+        print(len(merged),len(ifgs_df))
+    combined = pd.concat(df_list)
+    print(len(combined))
+        ## add hbond vdms
+        #ca_hbond = an.ifg_ca_hbond_vdm
+        #vdm_hbond = an.ifg_hbond_vdm
+    
+    #if hb == 'ca_hbond':
+    #    vdmhbond = vdmhbond.rename(columns={'number_hbonds':'ca_hbonds'})
+    #    vdmhbond = vdmhbond.loc[vdmhbond['rel_resnums'].isin(['0', '00', '000', '0000'])][['iFG_count', 'vdM_count', 'ca_hbonds']]
+    #else:
+    #    vdmhbond = vdmhbond.loc[vdmhbond['rel_resnums'].isin(['0', '00', '000', '0000'])][['iFG_count', 'vdM_count', 'number_hbonds']]
+    #merged = pd.merge(df, vdmhbond, on=['iFG_count','vdM_count'], how='left')
+    #return merged
 
-    return dist_vdms, vdms_bb, vdms_sc, an
+
+
+def refine_df(ifgs_dir, seq_dist, threefive, ifg, partial_ifg=None):
+    if partial_ifg == 'lonepair_imidazole':
+        parents = ['HIS']
+    else:
+        parents = [x for x in ifg_sele_dict[ifg].keys() if x in AAname.keys()]
+    vdmsbblist = []
+    vdmssclist = []
+    for aa in parents:
+        try:
+            ifgatoms = ifg_sele_dict[ifg][aa]
+        except: # lonepair imidazole
+            for elem in ifg_sele_dict[ifg]:
+                if aa in elem.keys():
+                    ifgatoms = elem[aa]
+                else:
+                    pass
+        path_to_csv = ifgs_dir+AAname[aa]+'/csv/'
+        an = Analyze(path_to_csv)
+        dist_vdms = an.get_distant_vdms(seq_distance=seq_dist)
+        if partial_ifg == 'lonepair_imidazole':
+            dist_vdms = an.get_lonepair_imidazole_ifgs(dist_vdms)
+
+        # add info about ifg-vdm dist from contacts csv, drop rare aa, select iFG atoms
+        contactsdf = an.ifg_contact_vdm
+        dist_vdms = pd.merge(dist_vdms,contactsdf[['iFG_count', 'vdM_count', 'dist_info']], \
+                            on=['iFG_count', 'vdM_count'])
+        dist_vdms = drop_rare_aa(dist_vdms)
+        vdms_bb = dist_vdms[dist_vdms.apply(cluster.Interactamer.has_bb_or_sc, bb_or_sc='bb',ifgatoms=ifgatoms,threepfive=threefive,axis=1)]
+        vdms_sc = dist_vdms[dist_vdms.apply(cluster.Interactamer.has_bb_or_sc, bb_or_sc='sc',ifgatoms=ifgatoms,threepfive=threefive,axis=1)]
+        vdmsbblist.append(vdms_bb)
+        vdmssclist.append(vdms_sc)
+    
+    # concat all bbvdms and scvdms from the diff parent amino acids
+    bbvdms = pd.concat(vdmsbblist,ignore_index=True)
+    bbvdms['bb'] = True
+    scvdms = pd.concat(vdmssclist,ignore_index=True)
+    scvdms['sc'] = True
+    combined = remove_repeat_proteins(combine_bb_sc(bbvdms,scvdms))
+    return combined
     
 def combine_bb_sc(bb, sc):
     '''useful for using the refine_df fx to get vdms within 3.5A within a separation dist.
     however, that returns separate dfs for bb/sc, so this combines them and takes out repeats'''
 
-    pd.concat([bb, sc])
-    concatenated = pd.concat([bb, sc],ignore_index=True)
+    #pd.concat([bb, sc])
+    concatenated = pd.concat([bb, sc],ignore_index=True, join='outer')
     nodup=concatenated.drop_duplicates()
     return nodup
     
-
+def add_burial_dist(df, database):
+    ifgs_df = df[['iFG_count','pdb','resname_ifg','resnum_ifg','chid_ifg']]
+    ifgs_df = ifgs_df.drop_duplicates()
+    num_ifgs = len(ifgs_df)
+    database = database.rename(columns={'pdbcode':'pdb','residuename':'resname_ifg',\
+        'residuenum':'resnum_ifg','chain':'chid_ifg'})
+    ifgs_df = pd.merge(ifgs_df,database,on=['pdb','resname_ifg','resnum_ifg','chid_ifg'],how='inner')
+    num_ifgs_processed = len(ifgs_df)# how many survived merging (how many actually have burialdist in database
+    database = database.rename(columns={'resname_ifg':'resname_vdm','resnum_ifg':'resnum_vdm', \
+        'chid_ifg':'chid_vdm'})
+    num_vdms = len(df)
+    vdms_df = pd.merge(df,database,on=['pdb','resname_vdm','resnum_vdm','chid_vdm'],how='inner')
+    num_vdms_processed = len(vdms_df)
+    print('% iFGs that have burial dist info: ', num_ifgs_processed/num_ifgs)
+    print('% vdMs that have burial dist info: ', num_vdms_processed/num_vdms)
+    return ifgs_df, vdms_df
 
 
 

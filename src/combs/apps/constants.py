@@ -1,4 +1,4 @@
-__all__ = ['one_letter_code', 'ifg_sele_dict', 'resname_dict', 'three_to_one', 'one_to_three']
+__all__ = ['one_letter_code', 'ifg_sele_dict', 'resname_dict', 'three_to_one', 'one_to_three', 'AAname']
 
 import collections
 
@@ -8,33 +8,17 @@ one_letter_code = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
                    'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M',
                    'MSE': 'm', 'ANY': '.', 'APX': '*', 'GNR':'*'}
 
+
+AAname = {'CYS': 'cysteine', 'ASP': 'aspartate', 'SER': 'serine', 'GLN': 'glutamine', 'LYS': 'lysine', 
+            'ILE': 'isoleucine', 'PRO': 'proline', 'THR': 'threonine', 'PHE': 'phenylalanine', 
+            'ASN': 'asparagine', 'GLY': 'glycine', 'HIS': 'histidine', 'LEU': 'leucine', 'ARG': 'arginine', 
+            'TRP': 'tryptophan', 'ALA': 'alanine', 'VAL': 'valine', 'GLU': 'glutamate', 'TYR': 'tyrosine', 
+            'MET': 'methionine'}
+
+
 three_letter_code = {}
 for k, v in one_letter_code.items():
     three_letter_code[v] = k
-
-#interactamer atoms are listed such that the flippable atoms are at indices 1 and 2
-# interactamer_atoms = {'HIS': ['NE2', 'CD2', 'CE1', 'ND1', 'CG'],
-#                       'LYS': ['CE', 'CD', 'NZ'],
-#                       'ASP': ['CG', 'OD1', 'OD2', 'CB'],
-#                       'PHE': ['CZ', 'CE1', 'CE2', 'CD1', 'CD2', 'CG'],
-#                       'ASN': ['CG', 'OD1', 'ND2', 'CB'],
-#                       'GLN': ['CD', 'OE1', 'NE2', 'CG'],
-#                       'ALA': ['C', 'CA', 'CB'],
-#                       'ARG': ['CZ', 'NH2', 'NH1', 'NE'],
-#                       'THR': ['OG1', 'CB', 'CG2'],
-#                       'GLY': ['CA', 'N', 'C'],
-#                       'TYR': ['CZ', 'CE1', 'CE2', 'CD1', 'CD2', 'CG', 'OH'],
-#                       'LEU': ['CG', 'CD1', 'CD2', 'CB'],
-#                       'VAL': ['CB', 'CG1', 'CG2'],
-#                       'GLU': ['CG', 'OE1', 'OE2', 'CD', 'CB'],
-#                       'PRO': ['CB', 'CG', 'CD'],
-#                       'SER': ['CB', 'OG', 'CA'],
-#                       'CYS': ['CB', 'SG', 'CA'],
-#                       'MET': ['SD', 'CG', 'CE', 'CB'],
-#                       'TRP': ['NE1', 'CD1', 'CE2', 'CB', 'CD2', 'CZ2', 'CE3', 'CZ3', 'CH2'],
-#                       'ILE': ['CG1', 'CD1', 'CB', 'CG2'],
-#                       'BB_CO': ['C', 'O', 'CA'],
-#                       'BB_NH': ['CA', 'N', 'C']}
 
 interactamer_atoms = collections.defaultdict(dict)
 # format of origin, plane1, plane2, so make sure flipped atoms 
@@ -60,29 +44,6 @@ interactamer_atoms['ILE']['Propyl'] = ['CB', 'CG1', 'CD1']
 interactamer_atoms['MET']['Thioether'] = ['CG', 'SD', 'CE']
 interactamer_atoms['PHE']['Aryl'] = ['CZ','CE1', 'CE2']
 interactamer_atoms['PRO']['Pyrrole'] = ['CB', 'CG', 'CD']
-
-
-#dict_ = {'LYS': ['CE', 'CD', 'NZ'],
-#          'ASP': ['CG', 'OD1', 'OD2'],
-#          'PHE': ['CZ', 'CE1', 'CE2'],
-#          'ASN': ['CG', 'OD1', 'ND2'],
-#          'GLN': ['CD', 'OE1', 'NE2'],
-#          'ALA': ['C', 'CA', 'CB'],
-#          'ARG': ['CZ', 'NH2', 'NH1'],
-#          'THR': ['OG1', 'CB', 'CG2'],
-#          'GLY': ['CA', 'N', 'C'],
-#          'TYR': ['CZ', 'CE1', 'OH'],
-#          'LEU': ['CG', 'CD1', 'CD2'],
-#          'VAL': ['CB', 'CG1', 'CG2'],
-#          'GLU': ['CD', 'OE1', 'OE2'],
-#          'PRO': ['CB', 'CG', 'CD'],
-#          'SER': ['CB', 'OG', 'CA'],
-#          'CYS': ['CB', 'SG', 'CA'],
-#          'MET': ['SD', 'CG', 'CE'],
-#          'TRP': ['NE1', 'CD1', 'CE2'],
-#          'ILE': ['CG1', 'CD1', 'CG2'],
-#          }
-#
 
 flip_names = {'PHE': [('CE1', 'CE2'), ('CD1', 'CD2')],
               'ASP': [('OD1', 'OD2')],
@@ -119,19 +80,20 @@ ifg_sele_dict = {}
 ifg_sele_dict['carboxamide'] = {'ASN': 'CB CG ND2 OD1', 'GLN': 'CG CD NE2 OE1', 'APX': 'C10 C11 N3 O1', 'GNR': 'CG CD NE2 OE1'}
 ifg_sele_dict['carboxylate'] = {'ASP': 'CB CG OD2 OD1', 'GLU': 'CG CD OE2 OE1', 'GNR': 'CA C OXT O'}
 ifg_sele_dict['imidazole'] = {'HIS': 'CG CD2 NE2 CE1 ND1'}
-ifg_sele_dict['lonepair_imidazole'] = [{'APX': 'C13 N1 N6 C10 C12'}, {'APX':'C12 C10 N6 N1 C13'}, {'APX': 'N1 C13 C12 C10 N6'}, {'APX':'C10 C12 C13 N1 N6'}]
+ifg_sele_dict['lonepair_imidazole'] = [{'HIS': 'CG CD2 NE2 CE1 ND1'}, {'APX': 'C13 N1 N6 C10 C12'}, {'APX':'C12 C10 N6 N1 C13'}, {'APX': 'N1 C13 C12 C10 N6'}, {'APX':'C10 C12 C13 N1 N6'}]
 ifg_sele_dict['indole'] = {'TRP': 'CG CD1 NE1 CE2 CZ2 CH2 CZ3 CE3 CD2'}
-ifg_sele_dict['tyrCOH'] = {'TYR': 'CZ OH'}
+ifg_sele_dict['hydroxyphenyl'] = {'TYR': 'CZ OH'}
 #ifg_sele_dict['backboneCO'] = {'APX': ['C8 O3','C19 O2']}
 ifg_sele_dict['backboneCO'] = {'ANY':'C O'}
-ifg_sele_dict['serCOH'] = {'SER':'CB OG'}
-ifg_sele_dict['thrCOH'] = {'THR':'CB OG1'}
-#ifg_sele_dict['phenyl'] = {'PHE': 'CG CD1 CD2 CE1 CE2 CZ', 'TYR': 'CG CD1 CD2 CE1 CE2 CZ'}
+ifg_sele_dict['hydroxyl'] = {'SER':'CB OG'}
+ifg_sele_dict['hydroxymethyl'] = {'THR':'CG2 CB OG1'}
+ifg_sele_dict['phenyl'] = {'PHE': 'CG CD1 CD2 CE1 CE2 CZ'}
 ifg_sele_dict['guanidino'] = {'ARG': 'NE CZ NH1 NH2'}
 ifg_sele_dict['amino'] = {'LYS': 'CE NZ', 'GNR': 'CA N'}
-ifg_sele_dict['isoleucine'] = {'ILE': 'CB CG1 CG2 CD1'}
-ifg_sele_dict['leucine'] = {'LEU': 'CB CG CD1 CD2'}
-ifg_sele_dict['valine'] = {'VAL': 'CB CG1 CG2'}
+ifg_sele_dict['methyl'] = {'ALA': 'CA CB'}
+ifg_sele_dict['isopropyl'] = {'VAL': 'CG1 CB CG2', 'LEU': 'CD1, CG, CD2'}
+ifg_sele_dict['propyl'] = {'ILE': 'CD1 CG1 CB'}
+ifg_sele_dict['thioether'] = {'MET': 'CG SD CE'}
 
 
 resname_dict = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',

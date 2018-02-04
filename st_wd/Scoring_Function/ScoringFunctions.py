@@ -289,7 +289,10 @@ def ideal_hbonds(pose, ifgname, ifgatoms, lookup_dir,ifgselection):
 
 def get_rosettaresnum(scaffold_pdb, residue_num):
     # vdmresnum might be offset, depending on if pdb starts numbering at 1 or not
-    parsed = pr.parsePDB(scaffold_pdb)
+    if type(scaffold_pdb) == str:
+        parsed = pr.parsePDB(scaffold_pdb)
+    else: # already parsed object
+        parsed = scaffold_pdb
     first_resnum = parsed.getResnums()[0]
     rosettavdmresnum = int(residue_num[:-1]) - first_resnum + 1
     return rosettavdmresnum
@@ -424,3 +427,28 @@ def score_poses(pose, lookup_dir, poses_dir, ifg_list, ligand_ifgs, scaffold_pdb
             ideal_hbond_score = ideal_hbonds(pose, ifgname, ifgatoms, lookup_dir, ifgselection)
             hbondscores_list.append(ideal_hbond_score)
     hbondscore = np.mean(hbondscores_list)
+
+
+
+
+
+# Example for getting  minimum distance of a query point [x,y,z] to the convex hull (protein surface).
+# The distance is negative if the point lies *outside* the hull.  (Positive if inside)
+#
+# hull = ConvexHull(cb_coords)
+# pdb_w_ligand = pr.parsePDB('protein_with_ligand.pdb')
+# min_distances_apx = []
+# for p in pdb_w_ligand.select('resname APX').getCoords():
+#     distances = []
+#     inout = pnt_in_cvex_hull(hull, p)
+#     if inout == 1:
+#         minmax = min
+#     else:
+#         minmax = max
+#     for i in range(len(tri.convex_hull)):
+#         distances.append(inout * distance(p, tri.points[tri.convex_hull[i]]))
+#     min_distances_apx.append(minmax(distances))
+# names_distances = list(zip(pdb_w_ligand.select('resname APX').getNames(), min_distances_apx))
+
+
+

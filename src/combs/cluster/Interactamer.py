@@ -1,4 +1,4 @@
-__all__ = ['make_bb_sc_rel_vdms', 'within_threepfive', 'has_bb_or_sc', 'make_rel_vdm_coords']
+__all__ = ['make_bb_sc_rel_vdms', 'has_bb_or_sc', 'make_rel_vdm_coords']
 
 import prody as pr
 import pandas as pd
@@ -277,13 +277,12 @@ def writepdb_and_get_pickle_info(pdb_path, pklout, vdm, comb, origin_atom, plane
         else:
             bb_coords, sc_coords, sc_coords_ON, sc_coords_CS, ifg_coords, ifg_ON_coords, ifg_CS_coords, pdbs, vdmelem1avgdists = y
 
-    print('at line 280')
     for i, bbc, scc, sccon, scccs, ic, icon, iccs, pdb in zip(range(len(bb_coords)), bb_coords, sc_coords, \
             sc_coords_ON, sc_coords_CS, ifg_coords, ifg_ON_coords, ifg_CS_coords, pdbs):
         
         pklout.append([ifg_count, vdm_count, bbc, scc, sccon, scccs, ic, icon, iccs, resn])
         string = repr(pdb).split()[1].split('_')
-        pr.writePDB(pdb_path + '_'.join(string[:-1]) + '_'+string[-1] + '_oriented.pdb.gz', pdb)
+        #pr.writePDB(pdb_path + '_'.join(string[:-1]) + '_'+string[-1] + '_oriented.pdb.gz', pdb)
     return pklout
 
 def make_rel_vdms(df, an, outpath, comb, origin_atom, plane_atom1, plane_atom2):
@@ -673,46 +672,45 @@ def make_ifg_atom_sele(pdb, comb, ifgselection=None, scoring=False, ifgatoms=Non
 
 
 ### SOPHIA ADDED ###
-def has_bb_or_sc(row, bb_or_sc,threepfive=False):
-    # determine whether there are bb or sc vdmatoms
-    # threepfive is an option for calculating freq_aai where you
-    # only want to get the bb & sc vdMs if the interacting atoms
-    # are within 3.5A
+def has_bb_or_sc(row, bb_or_sc, ifgatoms, threepfive=False):
+    '''
+    Determine whether there are bb or sc vdmatoms.
+    Args: @ bb_or_sc should be 'bb' or 'sc'
+          @ ifgatoms is a list of atoms in ifg 
+          @ threepfive boolean for selecting only bb/sc vdMs 
+            if the interacting atoms are within 3.5A
+    '''
     bb_atoms = ['N', 'CA', 'C', 'O', 'OXT']
-    try:
-        vdmatoms = row['atom_names_vdm'].split(' ')
-    except:
-        vdmatoms = row['atom_names'].split(' ')
+    vdmatoms = row['atom_names_vdm'].split(' ')
+    #try:
+    #    vdmatoms = row['atom_names_vdm'].split(' ')
+    #except:
+    #    vdmatoms = row['atom_names'].split(' ')
     num_bb_in_vdm = sum([x in bb_atoms for x in vdmatoms])
     has_bb = num_bb_in_vdm > 0
     has_sc = len(vdmatoms) > num_bb_in_vdm
-    bb_bool = np.array([x in bb_atoms for x in vdmatoms]) 
-    if bb_or_sc=='bb':
-        if threepfive==True:
-            close = within_threepfive(row, bb_atoms,bbsc='bb')
-            return has_bb and close
-        return has_bb 
-    elif bb_or_sc=='sc':
-        if threepfive==True:
-            close = within_threepfive(row, bb_atoms,bbsc='sc')
-            return has_sc and close
-        return has_sc 
+    return interaction_criteria(row, bb_atoms,ifgatoms,threefive=threepfive,bbsc=bb_or_sc)
 
-def within_threepfive(row,bb_atoms,bbsc):
-    # returns whether or not the interacting atom is within 3.5A
+def interaction_criteria(row,bb_atoms,ifgatoms,threefive,bbsc):
+    # returns whether or not the vdm fulfills criteria.
+    # a) selects vdmatoms within 3.5 or 4.8 of ifg 
+    # b) returns whether the vdmatoms are bb or sc
     dist = row['dist_info']
     dist = dist.strip('()').split(') (')
     dist = [x.split(' ') for x in dist] 
-    # this is now a list of lists where the inner list is 
-    # element0: iFG, element1: vdM, element2: distance
-    # check if the vdMs are bb or sc atoms
+    '''this is now a list of lists where the inner list is 
+       element0: iFG, element1: vdM, element2: distance '''
+    # get vdmatoms within 3.5 or 4.8 of ifg
+    if threefive==True:
+        vdmatoms = [v for v in dist if v[0] in ifgatoms and v[2]<=3.5]
+    else:
+        vdmatoms = [v for v in dist if v[0] in ifgatoms]
+    ## check if the vdMs are bb or sc atoms
     if bbsc=='bb':
-        vdms = [v for v in dist if v[1] in bb_atoms]
+        vdms = [v for v in vdmatoms if v[1] in bb_atoms]
     elif bbsc=='sc':
-        vdms = [v for v in dist if v[1] not in bb_atoms]
-    distances = [float(v[2]) for v in vdms]
-    numclose = sum([d<=3.5 for d in distances])
-    return numclose > 0
+        vdms = [v for v in vdmatoms if v[1] not in bb_atoms]
+    return len(vdms) > 0
 
 def make_bb_sc_rel_vdms(ifg_dir, comb,lonepair_imidazole=False):
     ''''makes transformed PDB files and pkl files for clustering'''
