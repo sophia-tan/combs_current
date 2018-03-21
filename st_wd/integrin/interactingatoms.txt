@@ -1,0 +1,44 @@
+--------------------
+Target Res A671 R
+ASP ['OD1']
+R ['NH2']
+GLY ['O', 'O', 'CA', 'C']
+R ['NH1', 'NH2', 'CZ', 'CZ']
+TYR ['OH', 'CZ', 'OH']
+R ['NH2', 'CZ', 'CZ']
+--------------------
+Target Res A673 I
+ARG ['CZ']
+I ['CD1']
+--------------------
+Target Res A753 N
+PRO ['CA']
+N ['CG']
+THR ['O', 'CA', 'C', 'C', 'CB']
+N ['ND2', 'CB', 'CB', 'CG', 'CB']
+--------------------
+Target Res A755 F
+ASP ['CG', 'CA', 'CA', 'CG', 'CB', 'CB']
+F ['CE2', 'CD2', 'CE2', 'CD2', 'CD2', 'CE2']
+CYS ['O', 'C', 'C', 'O']
+F ['CE2', 'CE2', 'CZ', 'CZ']
+PRO ['O', 'CA', 'C', 'O', 'C', 'C']
+F ['CE1', 'CE2', 'CZ', 'CZ', 'CE2', 'CE1']
+THR ['CA', 'C']
+F ['CZ', 'CZ']
+--------------------
+Target Res A760 V
+THR ['CG2', 'CB']
+V ['CG2', 'CG2']
+--------------------
+Target Res A785 E
+THR ['CG2', 'CG2', 'CG2', 'CG2']
+E ['CG', 'CD', 'CB', 'CA']
+PRO ['CB', 'CG', 'CD']
+E ['CD', 'CD', 'CD']
+TYR ['CE1', 'CE1']
+E ['OE2', 'CD']
+--------------------
+Target Res A900 R
+TYR ['CZ', 'CG', 'CB', 'CE2', 'CD1', 'CE1', 'CE1', 'CG', 'CD2', 'CD2', 'CB', 'CE1', 'CD1', 'CD1']
+R ['CD', 'CZ', 'CZ', 'CD', 'CD', 'NE', 'CD', 'CD', 'CZ', 'CD', 'CD', 'CZ', 'CZ', 'NE']
