@@ -1,0 +1,40 @@
+# take highest counts regardless if coming from sc or FG
+----------------------------
+A671 ARGfg-GLYbb
+80
+A671 ARGfg-ASPfg
+31
+A671 ARGfg-TYRfg
+3
+----------------------------
+A673 ILEfg-ARGfg 
+20
+----------------------------
+A753 ASNfg-THRsc 
+97
+A753 ASNfg-PRObb
+40
+----------------------------
+A755 PHEsc-PRObb
+18
+A755 PHEfg-THRbb
+14
+A755 PHEfg-CYSbb
+10
+A755 PHEfg-PRObb
+4
+A755 PHEfg-ASPsc
+20
+----------------------------
+A760 VALfg-THRfg
+391
+----------------------------
+A785 GLUfg-TYRfg
+7
+A785 GLUfg-THRfg
+67
+A785 GLUfg-PROsc 
+25
+----------------------------
+A900 ARGfg-TYRfg
+69

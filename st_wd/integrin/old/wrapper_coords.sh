@@ -1,7 +1,7 @@
-python run.py 671 > 671log & 
-python run.py 673 > 673log & 
-python run.py 753 > 753log & 
-python run.py 755 > 755log & 
-python run.py 760 > 760log & 
-python run.py 785 > 785log & 
-python run.py 900 > 900log & 
+nohup python get_clusters.py 671 > 671log & 
+nohup python get_clusters.py 673 > 673log & 
+nohup python get_clusters.py 753 > 753log & 
+nohup python get_clusters.py 755 > 755log & 
+nohup python get_clusters.py 760 > 760log & 
+nohup python get_clusters.py 785 > 785log & 
+nohup python get_clusters.py 900 > 900log & 

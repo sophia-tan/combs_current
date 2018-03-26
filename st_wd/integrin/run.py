@@ -1,7 +1,7 @@
 import sys
 sys.path.append('/home/gpu/Sophia/combs/src/')
 from combs.apps import *
-from ScoringFunctions import *
+#from ScoringFunctions import *
 #from PyrosettaScores import *
 from residues_integrin import *
 import prody as pr
@@ -26,36 +26,33 @@ for resi, resn in integrin_res.items():
         # for each target res, find the residues w/in 3.5 and 4.8A
         interacting_atoms = get_interacting_atoms(parsed, resi, resn)
         # list of list where inner list is [targetatomindex, int_resatomindex]
-        interacting_res = set(list([parsed.select('index %s'%x[1]).getResnames()[0] for x in interacting_atoms]))
+        interacting_resindices = set(list([parsed.select('index %s'%x[1]).getResindices()[0] for x in interacting_atoms]))
         
-        if len(interacting_res) > 0:
-            #print(interacting_res)
+        if len(interacting_resindices) > 0:
             geomdict[(resi,resn)] = {}
             print('--------------------')
             print('Target Res', resi, resn)
-            for int_res in interacting_res: 
+            for int_resindex in interacting_resindices: 
+                int_res = [int_resindex,parsed.select('resindex {}'.format(int_resindex)).getResnames()[0]]
                 print('Interacting Res', int_res)
                 # interacting_atoms has all the indices for all the atoms the target resn interacts with, 
-                #but we only want to look at the ones for this int_res
-                int_res_atoms = [x[1] for x in interacting_atoms if parsed.select('index %s'%x[1]).getResnames()[0] == int_res]
-                target_res_atoms = [x[0] for x in interacting_atoms if parsed.select('index %s'%x[1]).getResnames()[0] == int_res]
+                # but we only want to look at the ones for this int_res
+                int_res_atoms = [x[1] for x in interacting_atoms if parsed.select('index %s'%x[1]).getResindices()[0] == int_resindex]
+                target_res_atoms = [x[0] for x in interacting_atoms if parsed.select('index %s'%x[1]).getResindices()[0] == int_resindex]
                 
-                try:
-                    x=pkl.load(open('integrin_geom_dict.pkl','rb'))
-                except:
-                    ######### first, treat targetres (chA) as ifg, and then treat int_res as ifg ########
-                    # 1) targetres as ifg
-                    # int_res is resname
-                    ifgtype, vdmtype, ifginfo, vdminfo = get_ifg_vdm(parsed,constants.three_letter_code[resn], \
-                        int_res, target_res_atoms, int_res_atoms)
-                    chA_as_ifg = getcoords_and_dump(parsed,ifgtype,vdmtype,ifginfo,vdminfo,lookup_dir, db_dir, \
-                        pickled=True)
+                ######### first, treat targetres (chA) as ifg, and then treat int_res as ifg ########
+                # 1) targetres as ifg
+                # int_res is resname
+                ifgtype, vdmtype, ifginfo, vdminfo = get_ifg_vdm(parsed,constants.three_letter_code[resn], \
+                    int_res, target_res_atoms, int_res_atoms)
+                chA_as_ifg = getcoords_and_dump(parsed,ifgtype,vdmtype,ifginfo,vdminfo,lookup_dir, db_dir, \
+                    pickled=True, ifgs=True)
 
-                    # 2) int_res as ifg
-                    ifgtype, vdmtype, ifginfo, vdminfo = get_ifg_vdm(parsed,int_res, \
-                        constants.three_letter_code[resn], int_res_atoms, target_res_atoms)
-                    chB_as_ifg = getcoords_and_dump(parsed,ifgtype,vdmtype,ifginfo,vdminfo,lookup_dir, \
-                        db_dir, pickled=True)
-                    geomdict[(resi,resn)][int_res] = [chA_as_ifg, chB_as_ifg]
+                # 2) int_res as ifg
+                ifgtype, vdmtype, ifginfo, vdminfo = get_ifg_vdm(parsed,int_res, \
+                    constants.three_letter_code[resn], int_res_atoms, target_res_atoms)
+                chB_as_ifg = getcoords_and_dump(parsed,ifgtype,vdmtype,ifginfo,vdminfo,lookup_dir, \
+                    db_dir, pickled=True, ifgs=True)
+                geomdict[(resi,resn)][int_res[0]] = [int_res[1],chA_as_ifg, chB_as_ifg]
 
-#pkl.dump(geomdict, open('integrin_geom_dict.pkl','wb')) # each dict val is list of lists...look in plot.py for more details
+#pkl.dump(geomdict, open('ifgs_integrin_geom_dict.pkl','wb')) # each dict val is list of lists...look in plot.py for more details
