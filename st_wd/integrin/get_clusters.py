@@ -1,8 +1,6 @@
 import sys
 sys.path.append('/home/gpu/Sophia/combs/src/')
 from combs.apps import *
-#from ScoringFunctions import *
-#from PyrosettaScores import *
 from residues_integrin import *
 import prody as pr
 import numpy as np, pickle as pkl, pandas as pd
@@ -15,7 +13,7 @@ from Scoring import *
 # for getting the coords of combed vdms, which is slow
 
 lookup_dir = '/home/gpu/Sophia/combs/st_wd/Lookups/'
-db_dir = '/home/gpu/Sophia/combs/st_wd/20180207_db_molprobity_biolassem/'
+db_dir = '/home/gpu/Sophia/STcombs/20171118/database/reduce/'
 
 bb = ['C', 'O', 'OXT', 'CA', 'N']
 parsed = pr.parsePDB('integrin.pdb')
@@ -45,14 +43,19 @@ for resi, resn in integrin_res.items():
                 # int_res is resname
                 ifgtype, vdmtype, ifginfo, vdminfo = get_ifg_vdm(parsed,constants.three_letter_code[resn], \
                     int_res, target_res_atoms, int_res_atoms)
-                chA_as_ifg = get_clusters(resi,parsed,ifgtype,vdmtype,ifginfo,vdminfo,lookup_dir, db_dir, \
-                    ifgs=True)
+                print(int_res)
+                print(ifgtype)
+                print(vdmtype)
 
-                # 2) int_res as ifg
-                ifgtype, vdmtype, ifginfo, vdminfo = get_ifg_vdm(parsed,int_res, \
-                    constants.three_letter_code[resn], int_res_atoms, target_res_atoms)
-                chB_as_ifg = get_clusters(resi,parsed,ifgtype,vdmtype,ifginfo,vdminfo,lookup_dir, \
-                    db_dir, ifgs=True)
-                geomdict[(resi,resn)][int_res[0]] = [int_res[1],chA_as_ifg, chB_as_ifg]
+
+                #chA_as_ifg = get_clusters(resi,parsed,ifgtype,vdmtype,ifginfo,vdminfo,lookup_dir, db_dir, \
+                #    int_res)
+#
+                #### 2) int_res as ifg
+                ###ifgtype, vdmtype, ifginfo, vdminfo = get_ifg_vdm(parsed,int_res, \
+                ###    constants.three_letter_code[resn], int_res_atoms, target_res_atoms)
+                ###chB_as_ifg = get_clusters(resi,parsed,ifgtype,vdmtype,ifginfo,vdminfo,lookup_dir, \
+                ###    db_dir, ifgs=True)
+                #geomdict[(resi,resn)][int_res[0]] = [int_res[1],chA_as_ifg]
 
 #pkl.dump(geomdict, open('ifgs_integrin_geom_dict.pkl','wb')) # each dict val is list of lists...look in plot.py for more details

@@ -1,3 +1,5 @@
+# this is only for how many vdms can interact with an ifgres 
+# (includes vdms that don't  even directly act with the FG)
 --------------------
 Target Res A671 R
 Interacting Res [1449, 'GLY']

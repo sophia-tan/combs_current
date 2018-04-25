@@ -13,7 +13,7 @@ direc = '/home/gpu/Sophia/combs/st_wd/integrin/output_data/'
 csv_1 = '/home/gpu/Sophia/STcombs/20171118/{}/csv/'
 csv_2 = '/home/gpu/Sophia/combs/st_wd/20180207db_combed_csvs/{}/'
 
-def fg_contacting(row,vdm,ifg):
+def fg_contacting(row,vdm,ifg,typ):
     ifgcontacts = []
     vdmcontacts = []
     dist = row['dist_info'].lstrip('(')
@@ -28,33 +28,35 @@ def fg_contacting(row,vdm,ifg):
         elif float(ang) <= 4.8 and i[0]=='C' and v[0]=='C':
             vdmcontacts.append(v)
             ifgcontacts.append(i)
-    vdminter = len(set(apps.constants.ifg_atoms[vdm]).intersection(set(vdmcontacts)))
     ifginter = len(set(apps.constants.ifg_atoms[ifg]).intersection(set(ifgcontacts)))
+    if typ=='bb':
+        vdminter = len(set(['N','CA','C','O']).intersection(set(vdmcontacts)))
+    elif typ=='fg':
+        vdminter = len(set(apps.constants.ifg_atoms[vdm]).intersection(set(vdmcontacts)))
     if vdminter > 0 and ifginter>0:
         return True
     else:
         return False
 
 for pklf in os.listdir(direc):
-    ifg,vdm = pklf.split('_')[1],pklf.split('_')[3]
-    if ifg=='backbone':
-        ifg='glycine'
-    if vdm=='backbone':
-        vdm='glycine'
-    try:
-        an = analysis.Analyze(csv_1.format(ifg))
-    except:
-        an = analysis.Analyze(csv_2.format(ifg))
-    lookup = pkl.load(open(direc+pklf,'rb'))[2]
-    vdmsdir = '/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/'
-    refinedvdms = pkl.load(open(vdmsdir+'vdms_of_{}.pkl'.format(ifg),'rb'))
-    vdm=apps.constants.AAname_rev[vdm]
-    ifg=apps.constants.AAname_rev[ifg]
-    refinedvdms = refinedvdms[refinedvdms['resname_vdm']==vdm]
-    merged = refinedvdms.merge(an.ifg_contact_vdm,left_index=True,right_index=True)
-    #merged = merged[:10] # delete
-    unsuccessful = len(merged)-len(lookup) # couldn't get coords extracted
-    # count how many of those vdms have FG groups interacting
-    fg_intrxns = merged.apply(fg_contacting,vdm=vdm,ifg=ifg,axis=1)
-    print(ifg,vdm)
-    print(sum(fg_intrxns))
+    if pklf.endswith('.pkl'):
+        ifg,vdm = pklf.split('_')[4],pklf.split('_')[6]
+        try:
+            an = analysis.Analyze(csv_1.format(ifg))
+        except:
+            an = analysis.Analyze(csv_2.format(ifg))
+        lookup = pkl.load(open(direc+pklf,'rb'))
+        vdmsdir = '/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/'
+        refinedvdms = pkl.load(open(vdmsdir+'vdms_of_{}.pkl'.format(ifg),'rb'))
+        vdm=apps.constants.AAname_rev[vdm]
+        ifg=apps.constants.AAname_rev[ifg]
+        refinedvdms = refinedvdms[refinedvdms['resname_vdm']==vdm]
+        merged = refinedvdms.merge(an.ifg_contact_vdm,left_index=True,right_index=True)
+        #merged = merged[:10] # delete
+        unsuccessful = len(merged)-len(lookup) # couldn't get coords extracted
+        # count how many of those vdms have FG groups interacting
+        fg_bb_intrxns = merged.apply(fg_contacting,vdm=vdm,ifg=ifg,typ='bb',axis=1)
+        fg_fg_intrxns = merged.apply(fg_contacting,vdm=vdm,ifg=ifg,typ='fg',axis=1)
+        print(ifg,vdm)
+        print(sum(fg_fg_intrxns),'fg')
+        print(sum(fg_bb_intrxns),'bb')

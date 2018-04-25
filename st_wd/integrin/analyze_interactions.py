@@ -1,60 +1,72 @@
-# print out counts for how many interactamers are within 0.5 rmsd
-
-import sys
+import sys, os
+from scipy import stats
 sys.path.append('/home/gpu/Sophia/combs/src/')
 from combs.apps import *
 import pickle as pkl, numpy as np
-import collections
 
-script, cutoff=sys.argv
-cutoff_float = float(cutoff)
 
-geomdict=pkl.load(open('ifgs_integrin_geom_dict.pkl','rb'))
+fgintrxns = [35160,6336,10710,24775,18809,7348,8275]
 
-geodic = [(k,v) for k,v in geomdict.items()]
-geodic = collections.OrderedDict(sorted(geodic))
-
-def apply_cutoff(rmsds,cutoff):
-    ls=[]
-    for ix, num in enumerate(rmsds):
-        if num<=cutoff:
-            ls.append(ix)
-    return [rmsds[i] for i in ls]
+for cutoff in [.5]:
+    print('cutoff=:',cutoff)
     
+    def triage(row,cutoff):
+        rmsd,num_atoms = row['rmsds']
+        if rmsd < cutoff:
+            return True
+        else:
+            return False
+    
+    freq = pkl.load(open('/home/gpu/Sophia/combs/st_wd/Lookups/AAi_freq/AAi_database_lookups.pkl','rb'))
+    
+    targetresis = []
+    for pklf in sorted(os.listdir('./output_data/')):
+        if pklf.endswith('.pkl'):
+            targetresis.append(pklf.split('_')[0]+pklf.split('_')[4])
+    
+    rawcountslist = []
+    num_ifg_vdm_nums_list = []
+    fg_intrxns_list = []
 
-dic = {}
-for tag in geodic:
-    print('----------------------------')
-    k,v=tag,geodic[tag]
-    targetresi,targetresn = k
-    targetresn = constants.three_letter_code[targetresn]
-    # sort order of v
-    sortedv = [(k,v) for k,v in v.items()]
-    sortedv = collections.OrderedDict(sortedv)
-    dic[tag]= {}
+    for index,targetres in enumerate(sorted(set(targetresis))):
+        #print('----------------')
+        #print('Target Res: ', targetres)
+        rawcounts = 0
+        all_poss_intrxn= 0
+        freq_method = 0
+        for pklf in os.listdir('./output_data/'):
+            if pklf.startswith(targetres[:4]):
+                ifg = constants.AAname_rev[targetres[4:]]
+                vdm = constants.AAname_rev[pklf.split('_')[6]]
+                lookup = pkl.load(open('./output_data/'+pklf,'rb'))
+                no_nan = lookup.dropna(axis=0)
+                nan_count = len(lookup)-len(no_nan)
+                triaged = no_nan.apply(triage,axis=1,cutoff=cutoff)
+                rawcounts += sum(triaged)
+                all_poss_intrxn += len(triaged)
+                #print('Interacting residue: ', pklf.split('_')[6])
+                #print('nan',nan_count)
+        rawcountslist.append(rawcounts)
+        num_ifg_vdm_nums_list.append(rawcounts/all_poss_intrxn)
+        fg_intrxns_list.append(rawcounts/fgintrxns[index])
+    print(rawcountslist)
+    
+    AAs=['R671', 'I673', 'N753','F755','V760', 'E785','R900']
+    activation = np.array([0.61,0.23,0.54,0.42,0.83,0.47,0.31])
+    
+    # rosetta
+    calc = [1.53,0.12,1.32,1.76,0.71,1.20,0.54]
+    
+    for calc in [rawcountslist,num_ifg_vdm_nums_list,fg_intrxns_list]:
+        corr = stats.pearsonr(activation,calc)
+        print(corr[0])
+        corr = stats.spearmanr(activation,calc)
+        print(corr[0])
+#
 
-    for int_res, rmsdlists in sortedv.items():
-        dic[tag][int_res] = []
-        # there are 2 lists in rmsdlists. first is with combed vdMs of chA as ifg,
-        # second is with combed vdMs of chB as ifg
-        int_resn, intrxns = rmsdlists[0], rmsdlists[1]
-        for ix_pair,pair in enumerate(intrxns):
-            ifg,vdm=pair[0],pair[1]
-            rmsds=rmsdlists[1][ix_pair][2]+rmsdlists[2][ix_pair][2]
-            rmsds=apply_cutoff(rmsds,cutoff_float)
-            
-            if ifg=='backbone':
-                ifg='bb'
-            elif 'FG' in ifg:
-                ifg='fg'
-            else:
-                ifg='sc'
-            if vdm=='backbone':
-                vdm='bb'
-            elif 'FG' in vdm:
-                vdm='fg'
-            else:
-                vdm='sc'
-            print(targetresi+' '+targetresn+ifg+'-'+int_resn+vdm)
-            print(len(rmsds))
-
+#
+#print(sorted(set(targetresis)))
+#print(rawcountslist)
+#print(num_ifg_vdm_nums_list)
+#print(freq_method_list)
+#
