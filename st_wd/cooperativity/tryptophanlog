@@ -1,0 +1,7 @@
+389176 num vdms in original df
+388886 num vdms after repeats are removed
+done line 14
+Traceback (most recent call last):
+  File "gen_correlation.py", line 17, in <module>
+    threefive_df = threefive_df[['iFG_count', 'pdb', 'resname_ifg', 'resnum_ifg', 'chid_ifg', 'vdM_count', 'resname_vdm', 'resnum_vdm', 'chid_vdm', 'atom_names', 'dist_info']] # atom_names are atoms on vdm
+NameError: name 'vdms_bb' is not defined

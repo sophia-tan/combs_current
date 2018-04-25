@@ -17,6 +17,7 @@ print(len(df), 'number of vdMs w/ skipping #10')
 if ifg == 'lonepair_imidazole':
     df = an.get_lonepair_imidazole_ifgs(dist_df = df)
 
+#df = df[:10] ### delete
 df = analysis.Analysis.remove_repeat_proteins(df)
 
 # add info about ifg-vdm dist from contacts csv

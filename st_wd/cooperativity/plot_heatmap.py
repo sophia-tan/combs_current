@@ -3,7 +3,7 @@ import numpy as np
 from sys import argv
 
 script, ifg = argv
-corr, heatmap = pkl.load(open('../Lookups/noskip_%s_correlation.pkl'%ifg, 'rb'))
+corr, heatmap = pkl.load(open('../Lookups/correlation/matan_noskip_%s_correlation.pkl'%ifg, 'rb'))
 
 mask = np.zeros_like(heatmap, dtype=np.bool)
 mask[np.triu_indices_from(mask,k=1)] = True
