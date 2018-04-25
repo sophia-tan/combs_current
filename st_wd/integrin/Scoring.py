@@ -46,8 +46,7 @@ def get_ifg_vdm(parsed,ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms):
 
     ifgcontactatoms= [parsed.select('index %s'%x).getNames()[0] for x in ifg_contact_atoms]
     vdmcontactatoms= [parsed.select('index %s'%x).getNames()[0] for x in vdm_contact_atoms]
-    
-    #ifg = ifg_naming[list(constants.interactamer_atoms[targetresn].keys())[0]]
+    print(ifgcontactatoms,vdmcontactatoms)
     
     bb = ['C', 'O', 'CA', 'N'] # excluding OXT bc don't want to deal with that 
     ifgtype = []
@@ -215,7 +214,7 @@ def get_coordslist(parsed, ifgori, vdmori, ifginfo, vdminfo, lookup_dir, db_dir)
     # get coords for all combed vdms
     lookup = pkl.load(open(lookup_dir+'refinedvdms/vdms_of_{}.pkl'.format(ifg), 'rb'))
     lookup = lookup[lookup['resname_vdm']==constants.AAname_rev[vdm]]
-    #lookup = lookup[:10] ###delete###
+    lookup = lookup[:10] ###delete###
     nocoords = []
     lookup_ifgs = []
     lookup_vdms = []

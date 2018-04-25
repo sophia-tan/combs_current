@@ -1,0 +1,9 @@
+nohup python newget_clusters.py 671 > 671log & 
+nohup python newget_clusters.py 673 > 673log & 
+nohup python newget_clusters.py 753 > 753log & 
+nohup python newget_clusters.py 755 > 755log & 
+nohup python newget_clusters.py 760 > 760log & 
+nohup python newget_clusters.py 785 > 785log & 
+nohup python newget_clusters.py 900 > 900log & 
+nohup python newget_clusters.py 758 > 758log & 
+nohup python newget_clusters.py 787 > 787log & 

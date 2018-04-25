@@ -10,7 +10,7 @@ from pprint import pprint
 from itertools import *
 from Scoring import *
 
-script, inputres = sys.argv # inputres is resnum
+#script, inputres = sys.argv # inputres is resnum
 # from residues_integrin.py so we can do one AA at a time
 # for getting the coords of combed vdms, which is slow
 
@@ -21,8 +21,8 @@ bb = ['C', 'O', 'OXT', 'CA', 'N']
 parsed = pr.parsePDB('integrin.pdb')
 geomdict = {}
 for resi, resn in integrin_res.items():
-    #if 1==1:
-    if resi[1:] == inputres:
+    if 1==1:
+    #if resi[1:] == inputres:
         # for each target res, find the residues w/in 3.5 and 4.8A
         interacting_atoms = get_interacting_atoms(parsed, resi, resn)
         # list of list where inner list is [targetatomindex, int_resatomindex]
