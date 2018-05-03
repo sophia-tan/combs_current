@@ -10,7 +10,6 @@ from pprint import pprint
 from itertools import *
 import traceback
 from cluster_for_sophia import *
-from sklearn.neighbors import NearestNeighbors
 
 def get_interacting_atoms(parsed, resi, resn):    
     target = parsed.select('chain %s and resnum %s'%(resi[0], resi[1:]))
@@ -306,21 +305,8 @@ def flip(atom_ls,resn):
                     ls.append(copyls)
     return ls
 
-def get_order_of_atoms(item,ifgresn,vdmresn,ifgls,vdmls):
-    lookupatoms = []
-    ifgorder = np.array(constants.atoms_dict[ifgresn])
-    vdmorder = np.array(constants.atoms_dict[vdmresn])
-    for atom in ifgls:
-        index = np.where(ifgorder==atom)[0][0]
-        lookupatoms.append(np.array(item[1][index]))
-    for atom in vdmls:
-        index = np.where(vdmorder==atom)[0][0]
-        lookupatoms.append(np.array(item[2][index]))
-    lookupatoms = np.array(lookupatoms)
-    return lookupatoms
-
 def score_interaction_and_dump(parsed,ifgresn,vdmresn,ifg_contact_atoms,vdm_contact_atoms,method,targetresi):
-    ifgtype,vdmtype,ifginfo,vdminfo = get_ifg_vdm(parsed,ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,method)
+    ifgtype,vdmtype,ifginfo,vdminfo,num_interacting_vdms= get_ifg_vdm(parsed,ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,method,num_int_vdms=True)
     if ifgtype != None and vdmtype != None: # neighbors
         ifgresn = constants.AAname_rev[ifgtype[0]]
         vdmresn = constants.AAname_rev[vdmtype[0]]
@@ -336,7 +322,7 @@ def score_interaction_and_dump(parsed,ifgresn,vdmresn,ifg_contact_atoms,vdm_cont
             query.append(integrin.select('chain {} and resnum {} and name {}'.format(ifginfo[0],ifginfo[1],atom)).getCoords()[0])
         for atom in vdmatoms:
             query.append(integrin.select('chain {} and resnum {} and name {}'.format(vdminfo[0],vdminfo[1],atom)).getCoords()[0])
-
+        
         query = np.array(query)
         lookupcoords = pkl.load(open('/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/coords_of_{}.pkl'.format(ifgtype[0]),'rb'))
         #lookupcoords = lookupcoords[:100] # delete
@@ -345,60 +331,31 @@ def score_interaction_and_dump(parsed,ifgresn,vdmresn,ifg_contact_atoms,vdm_cont
         vdmlists = flip(vdmatoms,vdmresn)
         rmsds = []
         num_atoms = len(query)
+        rmsds.append([num_atoms,ifgatoms,vdmatoms,num_interacting_vdms]) # first element in rmsds
         coords_ls = [item for item in lookupcoords if item[0] in lookupdf.index]
-        lookupatoms_to_clus = []
-
-
         for item in coords_ls:
             if len(item)==3:
                 compare_rmsds = []
-                ifg_vdm_ind = []
-                for ifg_ind, ifgls in enumerate(ifglists):
-                    for vdm_ind, vdmls in enumerate(vdmlists):
-                        lookupatoms = get_order_of_atoms(item,ifgresn,vdmresn,ifgls,vdmls)
+                for ifgls in ifglists:
+                    for vdmls in vdmlists:
+                        lookupatoms = []
+                        ifgorder = np.array(constants.atoms_dict[ifgresn])
+                        vdmorder = np.array(constants.atoms_dict[vdmresn])
+                        for atom in ifgls:
+                            index = np.where(ifgorder==atom)[0][0]
+                            lookupatoms.append(np.array(item[1][index]))
+                        for atom in vdmls:
+                            index = np.where(vdmorder==atom)[0][0]
+                            lookupatoms.append(np.array(item[2][index]))
+                        lookupatoms = np.array(lookupatoms)
                         moved,transf = pr.superpose(lookupatoms, query) 
-                        temp_rmsd = pr.calcRMSD(moved,query)
-                        compare_rmsds.append(temp_rmsd)
-                        ifg_vdm_ind.append([moved,temp_rmsd])
+                        compare_rmsds.append(pr.calcRMSD(moved,query))
                 rmsds.append([item[0],min(compare_rmsds)]) # item[0] is df index
-                # get index of which one had min rmsd
-                for each in ifg_vdm_ind:
-                    if each[1] == min(compare_rmsds):
-                        lookupatoms_to_clus.append(moved)
             else:
                 rmsds.append([int(item[0]),100000])
-        # get avg size of cluster
-        D = make_pairwise_rmsd_mat(np.array(lookupatoms_to_clus).astype('float32'))
-        #D = make_pairwise_rmsd_mat(np.array(lookupatoms_to_clus))
-        D = make_square(D)
-        adj_mat = make_adj_mat(D, 0.5)
-        clusters = greedy(adj_mat)
-        avg_size_clus = np.mean([len(x) for x in clusters[0] ])
-
-        #NN_cutoffs = []
-        #for n_neighb in [1,2,3,5,10,20]:
-        #    for rad in [.5,.7,1,2]:
-        #        for no_singletons in [True,False]:
-        #            nbrs = NearestNeighbors(n_neighbors=n_neighb,metric='euclidean',radius=rad)
-        #            flat = [x.flatten() for x in lookupatoms_to_clus]
-        #            nnfit = nbrs.fit(flat)
-        #            # find avg num of NNs each vdm has
-        #            NNs = []
-        #            for coord in flat:
-        #                coord = coord.reshape(1,-1)
-        #                number_nn = len(nnfit.radius_neighbors(coord,return_distance=False)[0])
-        #                if no_singletons:
-        #                    if number_nn > 1:
-        #                        NNs.append(number_nn)
-        #                else:
-        #                        NNs.append(number_nn)
-        #        NN_cutoffs.append(np.mean(NNs))
-
-        #rmsds.append([num_atoms,ifgatoms,vdmatoms,NN_cutoffs]) # last element in rmsds
-        rmsds.append([num_atoms,ifgatoms,vdmatoms,avg_size_clus]) # last element in rmsds
         rmsds = np.array(rmsds)
         pkl.dump(rmsds, open('./output_data/{}_{}{}_{}{}_rmsds_{}.pkl'.format(targetresi,\
-            ifginfo[1],ifgresn,vdminfo[1],vdmresn,whole_res),'wb'))
+            ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),'wb'))
         return rmsds
 
 def output_pdbs(parsed,ifgresn,int_res,ifg_contact_atoms,vdm_contact_atoms,method,targetresi):

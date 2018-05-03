@@ -46,8 +46,8 @@ def rmsd_filter(method,cutoff,score):
     num_interacting_vdms_method_for_all_targets = []
     
     for targetres in sorted(set(targetresis)):
-        print('----------------')
-        print('Target Res: ', targetres)
+        #print('----------------')
+        #print('Target Res: ', targetres)
         rawcounts = []
         num_vdms = []
         exp_based_on_freq = []
@@ -73,9 +73,9 @@ def rmsd_filter(method,cutoff,score):
                     num_vdms_interacting = 1
                 num_interacting_vdms.append(num_vdms_interacting)
 
-                print('Interacting residue: ', pklf.split('_')[2])
-                print(rawcount)
-                print(num_vdms_interacting)
+                #print('Interacting residue: ', pklf.split('_')[2])
+                #print(rawcount)
+                #print(num_vdms_interacting)
                 #print(lookup.iloc[0]['rmsds'][1])
         rawcounts = np.array(rawcounts)
         num_vdms = np.array(num_vdms)
@@ -124,7 +124,7 @@ def get_correlation(megalist):
     for calc in megalist:
         corr = stats.pearsonr(activation,calc)
         print(corr[0],corr[1])
-        print(calc,'calc')
+        #print(calc,'calc')
         #corr = stats.spearmanr(activation,calc)
         #print(corr[0],corr[1])
 
@@ -134,7 +134,7 @@ for method in ['BBorSC']:
 #for method in ['planar_group','whole_res','BBorSC']:
     for cutoff in [.03]:
     #for cutoff in [.5]:
-        for score in ['c']:
+        for score in ['a','b','c','d']:
             print('+++++++++++++++++++++++++++++++')
             print('score method',score)
             megalist = rmsd_filter(method,cutoff,score)

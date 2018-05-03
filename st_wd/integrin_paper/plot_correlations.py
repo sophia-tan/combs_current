@@ -15,7 +15,8 @@ sortedactivation = sorted(activation)
 new_order = [np.where(activation==sortedactivation[ix])[0][0] for ix,i in enumerate(activation)]
 
 if method == 'pdb':
-    calc = [174, 44, 446, 714.00099999999998, 56, 236, 699.00199999999995, 505, 192, 32]
+    calc = [128, 43, 115, 108, 0.001, 193, 45, 0.001, 33, 0.001]
+    calc = [-0.56442745504304404, 0.33243845991560533, 0.74842252727210479, -0.36632714168594738, -3.0, 0.70577371239096354, -0.98238370794390373, -3.0, 0.31439395722196267, -3.0]
 
     xaxis = 'interaction geometry score'
     xaxis = 'raw counts'

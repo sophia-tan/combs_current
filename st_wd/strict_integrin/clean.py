@@ -28,7 +28,8 @@ def rmsd_filter(method,cutoff,score):
         new_ls = []
         for i in array:
             ix,rmsd = i
-            if rmsd/num_atoms < cutoff:
+            newcut = num_atoms*cutoff
+            if rmsd < newcut:
                 new_ls.append(True)
             else:
                 new_ls.append(False)
@@ -37,12 +38,13 @@ def rmsd_filter(method,cutoff,score):
     targetresis = []
     for pklf in sorted(os.listdir('./output_data/')):
         if pklf.endswith('_'+method+'.pkl'):
-            targetresis.append(pklf.split('_')[0]+pklf.split('_')[1][3:])
+            targetresis.append(pklf.split('_')[0])
     
     rawcounts_for_all_targets = []
     num_vdms_method_for_all_targets = []
     freq_method_for_all_targets = []
     num_interacting_vdms_method_for_all_targets = []
+    nn_method_for_all_targets = [[] for i in range(24)]
     
     for targetres in sorted(set(targetresis)):
         #print('----------------')
@@ -51,14 +53,15 @@ def rmsd_filter(method,cutoff,score):
         num_vdms = []
         exp_based_on_freq = []
         num_interacting_vdms = []
+        num_nn = [[] for i in range(24)]
         for pklf in os.listdir('./output_data/'):
             if pklf.startswith(targetres[:4]) and pklf.endswith('_'+method+'.pkl'):
-                ifg = targetres[4:]
+                ifg = pklf.split('_')[1][3:]
                 vdm = pklf.split('_')[2][3:]
-                lookup = pkl.load(open('./output_data/'+pklf,'rb')) # index 0 has atoms info
+                lookup = pkl.load(open('./output_data/'+pklf,'rb')) # last element has atoms info
                 num_atoms = lookup[0][0]
-                num_vdms_interacting = lookup[0][-1]
-                lookup = lookup[1:]
+                list_of_num_exp = lookup[-1][-1]
+                lookup = lookup[:-1]
                 #triaged = atomtriage(lookup,cutoff=cutoff,num_atoms=num_atoms)
                 triaged = triage(lookup,cutoff=cutoff)
                 rawcount = sum(triaged)
@@ -68,24 +71,25 @@ def rmsd_filter(method,cutoff,score):
                 rawcounts.append(rawcount)
                 num_vdms.append(len(triaged))
                 exp_based_on_freq.append(freq[0][ifg]*freq[1][vdm])
-                if num_vdms_interacting == 0:
-                    num_vdms_interacting = 1
-                num_interacting_vdms.append(num_vdms_interacting)
+                for nn_ind,avg_nn in enumerate(list_of_num_ex):
+                    num_nn[ind].append(avg_nn)
 
                 #print('Interacting residue: ', pklf.split('_')[2])
                 #print(rawcount)
+                #print(num_vdms_interacting)
                 #print(lookup.iloc[0]['rmsds'][1])
         rawcounts = np.array(rawcounts)
         num_vdms = np.array(num_vdms)
         exp_based_on_freq = np.array(exp_based_on_freq)
-        num_interacting_vdms = np.array(num_interacting_vdms)
+        num_nn = np.array(num_nn)
         if score == 'a':
             #print('method: for each interacting res, take log(num/denom). then, sum.')
             #print('score method "a"')
             rawcounts_for_all_targets.append(sum(rawcounts))
             num_vdms_method_for_all_targets.append(sum(np.log10(rawcounts/num_vdms)))
             freq_method_for_all_targets.append(sum(np.log10(rawcounts/exp_based_on_freq)))
-            num_interacting_vdms_method_for_all_targets.append(sum(np.log10(rawcounts/num_interacting_vdms)))
+            for nn_ind, nums in num_nn:
+                nn_method_for_all_targets[nn_ind].append(sum(np.log10(rawcounts/nums)))
         
         if score == 'b':
             #print('method: for each interacting res, take log(num/denom). then, average.')
@@ -93,7 +97,8 @@ def rmsd_filter(method,cutoff,score):
             rawcounts_for_all_targets.append(np.mean(rawcounts))
             num_vdms_method_for_all_targets.append(np.mean(np.log10(rawcounts/num_vdms)))
             freq_method_for_all_targets.append(np.mean(np.log10(rawcounts/exp_based_on_freq)))
-            num_interacting_vdms_method_for_all_targets.append(np.mean(np.log10(rawcounts/num_interacting_vdms)))
+            for nn_ind, nums in num_nn:
+                nn_method_for_all_targets[nn_ind].append(np.mean(np.log10(rawcounts/nums)))
 
         if score == 'c':
             #print('method: sum across all num and denom for each interacting res. then, take the log')
@@ -101,7 +106,8 @@ def rmsd_filter(method,cutoff,score):
             rawcounts_for_all_targets.append(sum(rawcounts))
             num_vdms_method_for_all_targets.append(np.log10(sum(rawcounts)/sum(num_vdms)))
             freq_method_for_all_targets.append(np.log10(sum(rawcounts)/sum(exp_based_on_freq)))
-            num_interacting_vdms_method_for_all_targets.append(np.log10(sum(rawcounts)/sum(num_interacting_vdms)))
+            for nn_ind, nums in num_nn:
+                nn_method_for_all_targets[nn_ind].append(np.log10(sum(rawcounts)/sum(nums)))
 
         if score == 'd':
             #print('method: avg across all num and denom for each interacting res. then, take the log')
@@ -109,10 +115,11 @@ def rmsd_filter(method,cutoff,score):
             rawcounts_for_all_targets.append(np.mean(rawcounts))
             num_vdms_method_for_all_targets.append(np.log10(np.mean(rawcounts)/np.mean(num_vdms)))
             freq_method_for_all_targets.append(np.log10(np.mean(rawcounts)/np.mean(exp_based_on_freq)))
-            num_interacting_vdms_method_for_all_targets.append(np.log10(np.mean(rawcounts)/np.mean(num_interacting_vdms)))
+            for nn_ind, nums in num_nn:
+                nn_method_for_all_targets[nn_ind].append(np.log10(np.mean(rawcounts)/np.mean(nums)))
     
-    megalist = [rawcounts_for_all_targets, num_vdms_method_for_all_targets,freq_method_for_all_targets,\
-                num_interacting_vdms_method_for_all_targets]
+    megalist = [rawcounts_for_all_targets, num_vdms_method_for_all_targets,freq_method_for_all_targets]
+    megalist += nn_method_for_all_targets
     return megalist
 
 def get_correlation(megalist):
@@ -121,13 +128,14 @@ def get_correlation(megalist):
     for calc in megalist:
         corr = stats.pearsonr(activation,calc)
         print(corr[0],corr[1])
-        #if cutoff==0.2:
-        #    print(calc,'calc')
+        #print(calc,'calc')
         #corr = stats.spearmanr(activation,calc)
         #print(corr[0],corr[1])
 
 
-for method in ['planar_group','whole_res','BBorSC']:
+for method in ['BBorSC','planar_group']:
+#for method in ['planar_group','BBorSC']:
+#for method in ['planar_group','whole_res','BBorSC']:
     for cutoff in [.2,.3,.4,.5]:
     #for cutoff in [.5]:
         for score in ['a','b','c','d']:

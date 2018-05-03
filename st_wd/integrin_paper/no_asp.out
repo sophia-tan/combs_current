@@ -1,0 +1,34 @@
+--------------------
+Target Res A753 N
+Interacting Res [1507, 'THR']
+Interacting Res [1509, 'PRO']
+--------------------
+Target Res A673 I
+Interacting Res [1402, 'ARG']
+--------------------
+Target Res A671 R
+Interacting Res [1449, 'GLY']
+Interacting Res [1450, 'ASP']
+Traceback (most recent call last):
+  File "calc_rmsds.py", line 45, in <module>
+    int_res, target_res_atoms, int_res_atoms,method=method,targetresi=resi)
+  File "/home/gpu/Sophia/combs/st_wd/integrin_paper/Scoring.py", line 323, in score_interaction_and_dump
+    ifgtype,vdmtype,ifginfo,vdminfo = get_ifg_vdm(parsed,ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,method)
+  File "/home/gpu/Sophia/combs/st_wd/integrin_paper/Scoring.py", line 74, in get_ifg_vdm
+    for typ in [bb,constants.planar_atoms[vdmresn]]:
+KeyError: 'ASP'
+--------------------
+Target Res A755 F
+Interacting Res [1506, 'PRO']
+Interacting Res [1507, 'THR']
+Interacting Res [1508, 'CYS']
+Interacting Res [1509, 'PRO']
+Interacting Res [1510, 'ASP']
+Traceback (most recent call last):
+  File "calc_rmsds.py", line 45, in <module>
+    int_res, target_res_atoms, int_res_atoms,method=method,targetresi=resi)
+  File "/home/gpu/Sophia/combs/st_wd/integrin_paper/Scoring.py", line 323, in score_interaction_and_dump
+    ifgtype,vdmtype,ifginfo,vdminfo = get_ifg_vdm(parsed,ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,method)
+  File "/home/gpu/Sophia/combs/st_wd/integrin_paper/Scoring.py", line 74, in get_ifg_vdm
+    for typ in [bb,constants.planar_atoms[vdmresn]]:
+KeyError: 'ASP'

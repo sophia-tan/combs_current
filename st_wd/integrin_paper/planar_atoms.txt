@@ -1,0 +1,314 @@
+--------------------
+Target Res A671 R
+ARG ifg resn
+{'NH1', 'NH2', 'CZ'} ifg contact atoms
+['NE', 'CZ', 'NH1', 'NH2'] planar atoms
+GLY vdm resn
+{'CA', 'C', 'O'} vdm contact atoms
+['CA', 'C', 'O'] planar atoms
+ARG ifg resn
+{'NH2'} ifg contact atoms
+['NE', 'CZ', 'NH1', 'NH2'] planar atoms
+ASP vdm resn
+{'OD1'} vdm contact atoms
+['CB', 'CG', 'OD2', 'OD1'] planar atoms
+ARG ifg resn
+{'CZ', 'NH2'} ifg contact atoms
+['NE', 'CZ', 'NH1', 'NH2'] planar atoms
+TYR vdm resn
+{'CZ', 'OH'} vdm contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ', 'OH'] planar atoms
+ARG ifg resn
+{'CG', 'CA', 'CB'} ifg contact atoms
+['CA', 'CB', 'CG'] planar atoms
+LEU vdm resn
+{'CD2'} vdm contact atoms
+['CB', 'CG', 'CD1', 'CD2'] planar atoms
+--------------------
+Target Res A673 I
+ILE ifg resn
+{'C'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+CYS vdm resn
+{'CA', 'CB'} vdm contact atoms
+['CA', 'CB', 'SG'] planar atoms
+ILE ifg resn
+{'CD1', 'CG2', 'CB', 'O'} ifg contact atoms
+['CA', 'CB', 'CG1', 'CG2'] planar atoms
+GLU vdm resn
+{'CD', 'N', 'CB', 'CG', 'OE1'} vdm contact atoms
+['CG', 'CD', 'OE2', 'OE1'] planar atoms
+ILE ifg resn
+{'CD1'} ifg contact atoms
+['CB', 'CG1', 'CD1'] planar atoms
+ARG vdm resn
+{'CZ'} vdm contact atoms
+['NE', 'CZ', 'NH1', 'NH2'] planar atoms
+--------------------
+Target Res A753 N
+ASN ifg resn
+{'C'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+HIS vdm resn
+{'CA'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+ASN ifg resn
+{'CG', 'ND2', 'CB'} ifg contact atoms
+['CB', 'CG', 'ND2', 'OD1'] planar atoms
+THR vdm resn
+{'CA', 'CB', 'C', 'O'} vdm contact atoms
+['CA', 'C', 'O'] planar atoms
+ASN ifg resn
+{'N', 'O'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+THR vdm resn
+{'N', 'O'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+ASN ifg resn
+{'CG'} ifg contact atoms
+['CB', 'CG', 'ND2', 'OD1'] planar atoms
+PRO vdm resn
+{'CA'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+ASN ifg resn
+{'CA', 'C'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+VAL vdm resn
+{'CG1', 'CG2', 'CB'} vdm contact atoms
+['CA', 'CG1', 'CB', 'CG2'] planar atoms
+ASN ifg resn
+{'CA', 'C', 'CB'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+PHE vdm resn
+{'CZ', 'CE1', 'CD1'} vdm contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'] planar atoms
+--------------------
+Target Res A755 F
+PHE ifg resn
+{'C'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+VAL vdm resn
+{'CA', 'C'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+PHE ifg resn
+{'CA', 'N', 'CB', 'O', 'C'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+GLU vdm resn
+{'CA', 'N', 'CB', 'O', 'CG', 'C'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+PHE ifg resn
+{'CZ', 'CE1'} ifg contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'] planar atoms
+PRO vdm resn
+{'C', 'O'} vdm contact atoms
+['CA', 'C', 'O'] planar atoms
+PHE ifg resn
+{'CE1', 'CD1'} ifg contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'] planar atoms
+THR vdm resn
+{'CB'} vdm contact atoms
+['CA', 'CG2', 'CB', 'OG1'] planar atoms
+PHE ifg resn
+{'CZ', 'CE2'} ifg contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'] planar atoms
+CYS vdm resn
+{'C', 'O'} vdm contact atoms
+['CA', 'C', 'O'] planar atoms
+PHE ifg resn
+{'CE2'} ifg contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'] planar atoms
+PRO vdm resn
+{'CA', 'C'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+PHE ifg resn
+{'CD2', 'CE2'} ifg contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'] planar atoms
+ASP vdm resn
+{'CG', 'CA', 'CB'} vdm contact atoms
+['CB', 'CG', 'OD2', 'OD1'] planar atoms
+PHE ifg resn
+{'CZ'} ifg contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'] planar atoms
+THR vdm resn
+{'CA', 'C'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+PHE ifg resn
+{'CZ', 'CE1', 'CD1'} ifg contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'] planar atoms
+ASN vdm resn
+{'CA', 'C', 'CB'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+--------------------
+Target Res A758 S
+SER ifg resn
+{'OG', 'CA', 'CB'} ifg contact atoms
+['CA', 'CB', 'OG'] planar atoms
+GLN vdm resn
+{'CG', 'C', 'CD'} vdm contact atoms
+['CG', 'CD', 'NE2', 'OE1'] planar atoms
+SER ifg resn
+{'CB'} ifg contact atoms
+['CA', 'CB', 'OG'] planar atoms
+LEU vdm resn
+{'CD1'} vdm contact atoms
+['CB', 'CG', 'CD1', 'CD2'] planar atoms
+SER ifg resn
+{'C', 'O'} ifg contact atoms
+['CA', 'C', 'O'] planar atoms
+PRO vdm resn
+{'CG', 'C', 'CB'} vdm contact atoms
+['CB', 'CG', 'CD'] planar atoms
+--------------------
+Target Res A760 V
+VAL ifg resn
+{'CG2'} ifg contact atoms
+['CA', 'CG1', 'CB', 'CG2'] planar atoms
+THR vdm resn
+{'CG2', 'CB'} vdm contact atoms
+['CA', 'CG2', 'CB', 'OG1'] planar atoms
+VAL ifg resn
+{'CA', 'CB', 'CG1'} ifg contact atoms
+['CA', 'CG1', 'CB', 'CG2'] planar atoms
+LEU vdm resn
+{'CA', 'CB', 'CD1', 'CG', 'C'} vdm contact atoms
+['CB', 'CG', 'CD1', 'CD2'] planar atoms
+VAL ifg resn
+{'CG2', 'CB'} ifg contact atoms
+['CA', 'CG1', 'CB', 'CG2'] planar atoms
+ALA vdm resn
+{'CB'} vdm contact atoms
+['N', 'CA', 'CB', 'C'] planar atoms
+--------------------
+Target Res A785 E
+GLU ifg resn
+{'CD'} ifg contact atoms
+['CG', 'CD', 'OE2', 'OE1'] planar atoms
+PRO vdm resn
+{'CG', 'CB', 'CD'} vdm contact atoms
+['CB', 'CG', 'CD'] planar atoms
+GLU ifg resn
+{'CG', 'CA', 'CB', 'CD'} ifg contact atoms
+['CG', 'CD', 'OE2', 'OE1'] planar atoms
+THR vdm resn
+{'CG2'} vdm contact atoms
+['CA', 'CG2', 'CB', 'OG1'] planar atoms
+GLU ifg resn
+{'O'} ifg contact atoms
+['CA', 'C', 'O'] planar atoms
+GLU vdm resn
+{'O'} vdm contact atoms
+['CA', 'C', 'O'] planar atoms
+GLU ifg resn
+{'CA', 'C', 'O'} ifg contact atoms
+['CA', 'C', 'O'] planar atoms
+LEU vdm resn
+{'CA', 'CD1'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+GLU ifg resn
+{'N', 'O'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+ARG vdm resn
+{'N', 'O'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+GLU ifg resn
+{'OE2', 'CD'} ifg contact atoms
+['CG', 'CD', 'OE2', 'OE1'] planar atoms
+ARG vdm resn
+{'CG', 'CD'} vdm contact atoms
+['CA', 'CB', 'CG'] planar atoms
+GLU ifg resn
+{'CG', 'CA', 'C'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+ALA vdm resn
+{'C'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+GLU ifg resn
+{'CG', 'CA', 'CB', 'CD'} ifg contact atoms
+['CG', 'CD', 'OE2', 'OE1'] planar atoms
+MET vdm resn
+{'CA', 'CB'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+GLU ifg resn
+{'OE2', 'CD'} ifg contact atoms
+['CG', 'CD', 'OE2', 'OE1'] planar atoms
+TYR vdm resn
+{'CE1'} vdm contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ', 'OH'] planar atoms
+--------------------
+Target Res A787 H
+HIS ifg resn
+{'CE1', 'NE2', 'O', 'CD2', 'CG', 'C'} ifg contact atoms
+['CG', 'ND1', 'CE1', 'NE2', 'CD2'] planar atoms
+ASN vdm resn
+{'CG', 'N', 'CA', 'CB'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+HIS ifg resn
+{'C', 'O'} ifg contact atoms
+['CA', 'C', 'O'] planar atoms
+VAL vdm resn
+{'CG1', 'CA', 'C', 'CB'} vdm contact atoms
+['CA', 'CG1', 'CB', 'CG2'] planar atoms
+HIS ifg resn
+{'N', 'CB', 'O'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+GLU vdm resn
+{'N', 'CB', 'O'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+HIS ifg resn
+{'CA', 'C'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+MET vdm resn
+{'CE'} vdm contact atoms
+['CG', 'SD', 'CE'] planar atoms
+HIS ifg resn
+{'CE1'} ifg contact atoms
+['CG', 'ND1', 'CE1', 'NE2', 'CD2'] planar atoms
+GLY vdm resn
+{'CA', 'C'} vdm contact atoms
+['N', 'CA', 'C'] planar atoms
+HIS ifg resn
+{'CE1', 'CA', 'CB', 'CD2', 'CG', 'ND1'} ifg contact atoms
+['CG', 'ND1', 'CE1', 'NE2', 'CD2'] planar atoms
+ARG vdm resn
+{'NH1', 'CA', 'CZ', 'CG', 'CD'} vdm contact atoms
+['NE', 'CZ', 'NH1', 'NH2'] planar atoms
+--------------------
+Target Res A900 R
+ARG ifg resn
+{'CG', 'CD'} ifg contact atoms
+['CA', 'CB', 'CG'] planar atoms
+GLU vdm resn
+{'OE2', 'CD'} vdm contact atoms
+['CG', 'CD', 'OE2', 'OE1'] planar atoms
+ARG ifg resn
+{'CG', 'CA'} ifg contact atoms
+['CA', 'CB', 'CG'] planar atoms
+LEU vdm resn
+{'C', 'O'} vdm contact atoms
+['CA', 'C', 'O'] planar atoms
+ARG ifg resn
+{'NH1', 'CA', 'CZ', 'CG', 'CD'} ifg contact atoms
+['NE', 'CZ', 'NH1', 'NH2'] planar atoms
+HIS vdm resn
+{'CE1', 'CA', 'CB', 'CD2', 'CG', 'ND1'} vdm contact atoms
+['CG', 'ND1', 'CE1', 'NE2', 'CD2'] planar atoms
+ARG ifg resn
+{'CA', 'C'} ifg contact atoms
+['N', 'CA', 'C'] planar atoms
+MET vdm resn
+{'CE'} vdm contact atoms
+['CG', 'SD', 'CE'] planar atoms
+ARG ifg resn
+{'CZ', 'NE', 'CD'} ifg contact atoms
+['NE', 'CZ', 'NH1', 'NH2'] planar atoms
+TYR vdm resn
+{'CG', 'CE2', 'CB', 'CZ', 'CD2', 'CD1', 'CE1'} vdm contact atoms
+['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ', 'OH'] planar atoms
+--------------------
+Target Res A959 L
+LEU ifg resn
+{'CG', 'CB'} ifg contact atoms
+['CB', 'CG', 'CD1', 'CD2'] planar atoms
+PRO vdm resn
+{'CG', 'CA', 'CB'} vdm contact atoms
+['CB', 'CG', 'CD'] planar atoms

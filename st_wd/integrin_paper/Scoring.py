@@ -3,14 +3,13 @@ sys.path.append('/home/gpu/Sophia/combs/src/')
 from combs.apps import *
 #from ScoringFunctions import *
 #from PyrosettaScores import *
+from cluster_for_sophia import *
 from residues_integrin import *
 import prody as pr
 import numpy as np, pickle as pkl, pandas as pd
 from pprint import pprint
 from itertools import *
 import traceback
-from cluster_for_sophia import *
-from sklearn.neighbors import NearestNeighbors
 
 def get_interacting_atoms(parsed, resi, resn):    
     target = parsed.select('chain %s and resnum %s'%(resi[0], resi[1:]))
@@ -18,7 +17,7 @@ def get_interacting_atoms(parsed, resi, resn):
     assert constants.one_letter_code[target.getResnames()[0]] == resn
 
     # find out if interaction is BB or SC
-    other_chain = parsed.select('not (chain {} and resnum {})'.format(resi[0],resi[1:]))
+    other_chain = parsed.select('not (chain {})'.format(resi[0],resi[1:]))
     bb = ['C', 'O', 'OXT', 'CA', 'N']
     polar = ['O', 'N']
     interacting_atoms = []
@@ -64,6 +63,7 @@ def get_ifg_vdm(parsed,ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,me
 
         if method=='planar_group':
             bb = ['N CA C','CA C O']
+            #bb = []
             ifgatoms = ''
             vdmatoms = ''
             for typ in [bb,constants.planar_atoms[ifgresn]]:
@@ -321,12 +321,12 @@ def get_order_of_atoms(item,ifgresn,vdmresn,ifgls,vdmls):
 
 def score_interaction_and_dump(parsed,ifgresn,vdmresn,ifg_contact_atoms,vdm_contact_atoms,method,targetresi):
     ifgtype,vdmtype,ifginfo,vdminfo = get_ifg_vdm(parsed,ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,method)
-    if ifgtype != None and vdmtype != None: # neighbors
+    if ifgtype[1] != ['N','CA','C'] and ifgtype[1] != ['CA','C','O']:
         ifgresn = constants.AAname_rev[ifgtype[0]]
         vdmresn = constants.AAname_rev[vdmtype[0]]
         ifgatoms = ifgtype[1]
         vdmatoms = vdmtype[1]
-        
+
         lookupdf=pkl.load(open('/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/vdms_of_{}.pkl'.format(ifgtype[0]),'rb')) 
         lookupdf = lookupdf[lookupdf['resname_vdm']==vdmresn]
         
@@ -348,7 +348,6 @@ def score_interaction_and_dump(parsed,ifgresn,vdmresn,ifg_contact_atoms,vdm_cont
         coords_ls = [item for item in lookupcoords if item[0] in lookupdf.index]
         lookupatoms_to_clus = []
 
-
         for item in coords_ls:
             if len(item)==3:
                 compare_rmsds = []
@@ -367,39 +366,38 @@ def score_interaction_and_dump(parsed,ifgresn,vdmresn,ifg_contact_atoms,vdm_cont
                         lookupatoms_to_clus.append(moved)
             else:
                 rmsds.append([int(item[0]),100000])
+
         # get avg size of cluster
-        D = make_pairwise_rmsd_mat(np.array(lookupatoms_to_clus).astype('float32'))
-        #D = make_pairwise_rmsd_mat(np.array(lookupatoms_to_clus))
-        D = make_square(D)
+        try:
+            D = pkl.load(open('./output_data/{}_{}{}_{}{}_pairwisematrix_{}.pkl'.format(targetresi,\
+                ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),'rb'))
+        except:
+            D = make_pairwise_rmsd_mat(np.array(lookupatoms_to_clus).astype('float32'))
+            D = make_square(D)
+            pkl.dump(D, open('./output_data/{}_{}{}_{}{}_pairwisematrix_{}.pkl'.format(targetresi,\
+                ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),'wb'),protocol=4)
+            
         adj_mat = make_adj_mat(D, 0.5)
-        clusters = greedy(adj_mat)
-        avg_size_clus = np.mean([len(x) for x in clusters[0] ])
+        mems,centroids = greedy(adj_mat)
+        avg_size_clus = np.mean([len(x) for x in mems if len(x) > 1])
+        #avg_size_clus = np.mean([len(x) for x in mems])
 
-        #NN_cutoffs = []
-        #for n_neighb in [1,2,3,5,10,20]:
-        #    for rad in [.5,.7,1,2]:
-        #        for no_singletons in [True,False]:
-        #            nbrs = NearestNeighbors(n_neighbors=n_neighb,metric='euclidean',radius=rad)
-        #            flat = [x.flatten() for x in lookupatoms_to_clus]
-        #            nnfit = nbrs.fit(flat)
-        #            # find avg num of NNs each vdm has
-        #            NNs = []
-        #            for coord in flat:
-        #                coord = coord.reshape(1,-1)
-        #                number_nn = len(nnfit.radius_neighbors(coord,return_distance=False)[0])
-        #                if no_singletons:
-        #                    if number_nn > 1:
-        #                        NNs.append(number_nn)
-        #                else:
-        #                        NNs.append(number_nn)
-        #        NN_cutoffs.append(np.mean(NNs))
+        # find out which cluster the integrin's interactamer is in (find centroid w/ lowest rmsd)
+        centroid_rmsds = []
+        for cent_ix in centroids: # cent is an index
+            cent = lookupatoms_to_clus[cent_ix]
+            rmsd = pr.calcRMSD(cent,query)
+            centroid_rmsds.append(rmsd)
+        min_ix = np.argmin(centroid_rmsds)
+        integrin_clus = len(mems[min_ix]) # size of cluster the integrin is in
 
-        #rmsds.append([num_atoms,ifgatoms,vdmatoms,NN_cutoffs]) # last element in rmsds
-        rmsds.append([num_atoms,ifgatoms,vdmatoms,avg_size_clus]) # last element in rmsds
+        rmsds.append([num_atoms,ifgatoms,vdmatoms,integrin_clus,avg_size_clus])
         rmsds = np.array(rmsds)
         pkl.dump(rmsds, open('./output_data/{}_{}{}_{}{}_rmsds_{}.pkl'.format(targetresi,\
-            ifginfo[1],ifgresn,vdminfo[1],vdmresn,whole_res),'wb'))
+            ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),'wb'))
         return rmsds
+    else:
+        print(ifginfo,ifgresn,vdminfo,vdmresn)
 
 def output_pdbs(parsed,ifgresn,int_res,ifg_contact_atoms,vdm_contact_atoms,method,targetresi):
     '''basically, copied and pasted parts of the 'score_interaction_and_dump' 
@@ -435,7 +433,7 @@ def output_pdbs(parsed,ifgresn,int_res,ifg_contact_atoms,vdm_contact_atoms,metho
         coords_ls = [item for item in lookupcoords if item[0] in lookupdf.index]
         counter = 0 # so don't output ALL the pdbs
         for item in coords_ls:
-            if counter < 25:
+            if counter < 50:
                 if len(item)==3:
                     ifgls,vdmls=ifglists[0],vdmlists[0] # take first element instead of comparing for ease of scripting. then, ignore if rmsd is too high
                     lookupatoms = []
@@ -450,7 +448,7 @@ def output_pdbs(parsed,ifgresn,int_res,ifg_contact_atoms,vdm_contact_atoms,metho
                     lookupatoms = np.array(lookupatoms)
                     moved,transf = pr.superpose(lookupatoms, query) 
                     rmsd = pr.calcRMSD(moved,query)
-                    if rmsd < 0.4:
+                    if rmsd < 0.5:
                         row = lookupdf.loc[item[0]]
                         try:
                             db_dir = '/home/gpu/Sophia/STcombs/20171118/database/reduce/'
@@ -482,30 +480,32 @@ def output_pdbs(parsed,ifgresn,int_res,ifg_contact_atoms,vdm_contact_atoms,metho
                             printout_interactamer = sum(printout_interactamer[1:], printout_interactamer[0])
                             #integrin_interactamer = integrin_interactamer.select('not name OXT')
                             #printout_interactamer = printout_interactamer.select('not name OXT')
-                            assert len(integrin_interactamer) == len(printout_interactamer)
-
-                            #''''#for index in range(len(integrin_interactamer)):
-                            #''''#    if list(integrin_interactamer)[index].getResname() != list(printout_interactamer)[index].getResname():
-                            #''''#        #print(integrin_interactamer[index].getResname())
-                            #''''#        #print(printout_interactamer[index].getResname())
-                            #''''#        print('diff residues',integrin_interactamer.getNames())
-                            #''''#        print('diff residues',printout_interactamer.getNames())
-                            #moved,transf = pr.superpose(printout_interactamer, integrin_interactamer)
-                            interact_res = printout.select('(chain X and resnum 10) or (chain Y and resnum 10)')
-                            interactamer_transf = pr.applyTransformation(transf, printout_interactamer)
-                            #interactamer_transf = pr.applyTransformation(transf, interact_res)
-                            outdir = '/home/gpu/Sophia/combs/st_wd/strict_integrin/output_data/pdbfiles/'
-                            
-                            threecode = constants.AAname[ifgresn]
                             try:
-                                contactsdf = pd.read_csv('/home/gpu/Sophia/STcombs/20171118/{}/csv/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
-                            except:
-                                contactsdf = pd.read_csv('/home/gpu/Sophia/combs/st_wd/20180207db_combed_csvs/{}/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
-                            
+                                assert len(integrin_interactamer) == len(printout_interactamer)
 
-                            pr.writePDB(outdir+'{}_{}{}_{}.pdb'.format(targetresi,int_res[0],int_res[1],row.name),interactamer_transf)
-                            pr.writePDB(outdir+'{}_{}{}_{}.pdb'.format(targetresi,int_res[0],'blah',row.name),interact_res)
-                            counter += 1
+                                #''''#for index in range(len(integrin_interactamer)):
+                                #''''#    if list(integrin_interactamer)[index].getResname() != list(printout_interactamer)[index].getResname():
+                                #''''#        #print(integrin_interactamer[index].getResname())
+                                #''''#        #print(printout_interactamer[index].getResname())
+                                #''''#        print('diff residues',integrin_interactamer.getNames())
+                                #''''#        print('diff residues',printout_interactamer.getNames())
+                                #moved,transf = pr.superpose(printout_interactamer, integrin_interactamer)
+                                interact_res = printout.select('(chain X and resnum 10) or (chain Y and resnum 10)')
+                                interactamer_transf = pr.applyTransformation(transf, printout_interactamer)
+                                #interactamer_transf = pr.applyTransformation(transf, interact_res)
+                                outdir = '/home/gpu/Sophia/combs/st_wd/integrin_paper/output_data/pdbfiles/'
+                                
+                                threecode = constants.AAname[ifgresn]
+                                try:
+                                    contactsdf = pd.read_csv('/home/gpu/Sophia/STcombs/20171118/{}/csv/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
+                                except:
+                                    contactsdf = pd.read_csv('/home/gpu/Sophia/combs/st_wd/20180207db_combed_csvs/{}/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
+                                
+
+                                pr.writePDB(outdir+'{}_{}{}_{}.pdb'.format(targetresi,int_res[0],int_res[1],row.name),interactamer_transf)
+                                counter += 1
+                            except:
+                                pass
                         except:
                             traceback.print_exc()
                             pass
