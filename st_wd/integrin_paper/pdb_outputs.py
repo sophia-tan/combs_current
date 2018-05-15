@@ -1,3 +1,5 @@
+# for getting clusters for figures 
+
 import sys
 sys.path.append('/home/gpu/Sophia/combs/src/')
 from combs.apps import *

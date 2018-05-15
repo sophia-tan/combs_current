@@ -39,142 +39,98 @@ def get_interacting_atoms(parsed, resi, resn):
                         interacting_atoms.append((ifgindex,vdmindex))
     return list(set(interacting_atoms))
 
-def get_ifg_vdm(parsed,ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,method,num_int_vdms=False):
+def get_ifg_vdm(parsed,ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,method):
     '''determine if the ifg is making bb or sc intrxns, and if the vdm is making 
     bb or sc intrxns'''
     ifginfo = [parsed.select('index %s'%ifg_contact_atoms[0]).getChids()[0], parsed.select('index %s'%ifg_contact_atoms[0]).getResnums()[0]]
     vdminfo = [parsed.select('index %s'%vdm_contact_atoms[0]).getChids()[0], parsed.select('index %s'%vdm_contact_atoms[0]).getResnums()[0]]
     
-    if abs(ifginfo[1]-vdminfo[1]) == 1: # they are neighbors 
-        if num_int_vdms:
-            return None,None,None,None,None
-        else:
-            return None,None,None,None
-    else:
-        if type(ifgresn)==list:
-            ifgresn=ifgresn[1]
-        if type(vdmresn)==list:
-            vdmresn=vdmresn[1]
+    if type(ifgresn)==list:
+        ifgresn=ifgresn[1]
+    if type(vdmresn)==list:
+        vdmresn=vdmresn[1]
 
-        ifgcontactatoms=[parsed.select('index %s'%x).getNames()[0] for x in ifg_contact_atoms]
-        vdmcontactatoms=[parsed.select('index %s'%x).getNames()[0] for x in vdm_contact_atoms]
+    ifgcontactatoms=[parsed.select('index %s'%x).getNames()[0] for x in ifg_contact_atoms]
+    vdmcontactatoms=[parsed.select('index %s'%x).getNames()[0] for x in vdm_contact_atoms]
+    
+    
+
+    if method=='planar_group':
+        bb = ['N CA C','CA C O']
+        #bb = []
+        ifgatoms = ''
+        vdmatoms = ''
+        for typ in [bb,constants.planar_atoms[ifgresn]]:
+            for element in typ:
+                element = element.split(' ')
+                if len(set(element).intersection(set(ifgcontactatoms))) > len(set(ifgatoms).intersection(set(ifgcontactatoms))):
+                    ifgatoms = element
+        for typ in [bb,constants.planar_atoms[vdmresn]]:
+            for element in typ:
+                element = element.split(' ')
+                if len(set(element).intersection(set(vdmcontactatoms))) > len(set(vdmatoms).intersection(set(vdmcontactatoms))):
+                    vdmatoms = element
         
-        
+    elif method=='whole_res':
+        ifgatoms = constants.atoms_dict[ifgresn]
+        vdmatoms = constants.atoms_dict[vdmresn]
+    
+    elif method == 'BBorSC':
+        bb = ['C', 'O', 'CA', 'N']
+        ifgbb = len(set(bb).intersection(set(ifgcontactatoms))) 
+        vdmbb = len(set(bb).intersection(set(vdmcontactatoms))) 
+        if (len(set(ifgcontactatoms))-ifgbb) >= ifgbb:
+            ifgatoms = constants.AA_sc_dict[ifgresn]
+            if ifgresn == 'ALA':
+                ifgatoms = ['CA', 'CB']
+        else: 
+            ifgatoms = ['N', 'CA', 'C', 'O']
+        if (len(set(vdmcontactatoms))-vdmbb) >= vdmbb:
+            vdmatoms = constants.AA_sc_dict[vdmresn]
+            if vdmresn == 'ALA':
+                vdmatoms = ['CA', 'CB']
+        else: 
+            vdmatoms = ['N', 'CA', 'C', 'O']
 
-        if method=='planar_group':
-            bb = ['N CA C','CA C O']
-            #bb = []
-            ifgatoms = ''
-            vdmatoms = ''
-            for typ in [bb,constants.planar_atoms[ifgresn]]:
-                for element in typ:
-                    element = element.split(' ')
-                    if len(set(element).intersection(set(ifgcontactatoms))) > len(set(ifgatoms).intersection(set(ifgcontactatoms))):
-                        ifgatoms = element
-            for typ in [bb,constants.planar_atoms[vdmresn]]:
-                for element in typ:
-                    element = element.split(' ')
-                    if len(set(element).intersection(set(vdmcontactatoms))) > len(set(vdmatoms).intersection(set(vdmcontactatoms))):
-                        vdmatoms = element
-            
-        elif method=='whole_res':
-            ifgatoms = constants.atoms_dict[ifgresn]
-            vdmatoms = constants.atoms_dict[vdmresn]
-        
-        elif method == 'BBorSC':
-            bb = ['C', 'O', 'CA', 'N']
-            ifgbb = len(set(bb).intersection(set(ifgcontactatoms))) 
-            vdmbb = len(set(bb).intersection(set(vdmcontactatoms))) 
-            if (len(set(ifgcontactatoms))-ifgbb) >= ifgbb:
-                ifgatoms = constants.AA_sc_dict[ifgresn]
-                if ifgresn == 'ALA':
-                    ifgatoms = ['CA', 'CB']
-            else: 
-                ifgatoms = ['N', 'CA', 'C', 'O']
-            if (len(set(vdmcontactatoms))-vdmbb) >= vdmbb:
-                vdmatoms = constants.AA_sc_dict[vdmresn]
-                if vdmresn == 'ALA':
-                    vdmatoms = ['CA', 'CB']
-            else: 
-                vdmatoms = ['N', 'CA', 'C', 'O']
+    # if bb interactions, need to get combed GLY
+    # only for iFG, not vdm bc no combed bbs
+    if len(set(ifgatoms).intersection(['N','CA','C','O'])) > 1:
+        ifgresn='GLY'
 
-        # if bb interactions, need to get combed GLY
-        if len(set(ifgatoms).intersection(['N','CA','C','O'])) > 1:
-            ifgresn='GLY'
-        #if len(set(vdmatoms).intersection(['N','CA','C','O'])) > 1:
-        #    vdmresn='GLY'
+    def assign(atomlist,res):
+        return [constants.AAname[res],atomlist]
 
-        # get # of vdms where the ifgs and vdms are interacting through ifgatoms and vdmatoms
-        if num_int_vdms == True:
-            num_interacting_vdms = 0
-            #threecode = constants.AAname[ifgresn]
-            #try:
-            #    csv = pd.read_csv('/home/gpu/Sophia/STcombs/20171118/{}/csv/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
-            #except:
-            #    csv = pd.read_csv('/home/gpu/Sophia/combs/st_wd/20180207db_combed_csvs/{}/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
-            ##csv = csv[:1000]
-            #vdmpdbinfo=pkl.load(open('/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/vdms_of_{}.pkl'.format(threecode),'rb')) 
-            #csv = pd.merge(csv,vdmpdbinfo,left_index=True,right_index=True)
-            ##csv = pd.merge(csv,vdmpdbinfo, on=['vdM_count', 'vdM_count'])
-            #csv = csv[csv['resname_vdm']==vdmresn]
-            #for ix,row in csv.iterrows():
-            #    dist = row['dist_info']
-            #    dist = dist.lstrip('(')
-            #    dist = dist.rstrip(')')
-            #    dist = dist.split(') (')
-            #    dist = [x.split(' ') for x in dist]
-            #    for elem in dist:
-            #        if elem[0] in ifgatoms and elem[1] in vdmatoms:
-            #            num_interacting_vdms += 1
-            #            break
-            #        else:
-            #            pass
-            #print(num_interacting_vdms)
+    ifgtype = assign(ifgatoms,ifgresn)
+    vdmtype = assign(vdmatoms,vdmresn)
 
+    return ifgtype, vdmtype, ifginfo, vdminfo
 
-        #elif method == 'FGorBBorSC':
-        #    if ifgfg>=ifgbb:
-        #        ifgatoms = constants.ifg_atoms[ifgresn]
-        #    else:
-        #        ifgatoms = ['N', 'CA', 'C', 'O']
-        #    if vdmfg>=vdmbb:
-        #        vdmatoms = constants.ifg_atoms[vdmresn]
-        #    else:
-        #        vdmatoms = ['N', 'CA', 'C', 'O']
-        #    if ifgbb==0 and ifgfg==0: # use whole sc
-        #        ifgatoms = constants.AA_sc_dict[ifgresn]
-        #    if vdmbb==0 and vdmfg==0:
-        #        vdmatoms = constants.AA_sc_dict[vdmresn]
+def only_contacting(row,ifgatoms,vdmatoms):
+    dist = row['dist_info']
+    dist = dist.lstrip('(')
+    dist = dist.rstrip(')')
+    dist = dist.split(') (')
+    dist = [x.split(' ') for x in dist]
+    for elem in dist:
+        if elem[0] in ifgatoms and elem[1] in vdmatoms:
+            return True
+    return False
 
-        #elif method=='direct_intrxn':
-        #    # just interacting atoms
-        #    ifgatoms = ifgcontactatoms
-        #    vdmatoms = vdmcontactatoms
+def filter_contact(ifgresn,vdmresn,ifgatoms,vdmatoms):
+    ''' keep only the vdM rows where the ifgs and vdms are 
+    interacting through ifgatoms and vdmatoms '''
 
-        def assign(atomlist,res):
-            return [constants.AAname[res],atomlist]
-
-        ifgtype = assign(ifgatoms,ifgresn)
-        vdmtype = assign(vdmatoms,vdmresn)
-
-        if num_int_vdms:
-            return ifgtype, vdmtype, ifginfo, vdminfo,num_interacting_vdms
-        else:
-            return ifgtype, vdmtype, ifginfo, vdminfo
-
-def get_clusters(targetresi,parsed,ifgtype,vdmtype,ifginfo,vdminfo,lookup_dir, db_dir, int_res):
-    ''' get coords of ifgs and vdms, 
-    Use ifg=True if you want to align just the iFG groups and not whole sc'''
-    df_lists = []# multiple lists bc it's for every ifg and every vdm in an intrxn
-    for origifg in ifgtype:
-        for origvdm in vdmtype:
-            ifgres,ifgatoms=origifg
-            vdmres,vdmatoms=origvdm
-            if ifgres!='cysteine':
-                info = [ifgres,vdmres,ifgatoms,vdmatoms]
-                df = get_coordslistforcluster(targetresi,parsed,ifgres, vdmres, ifgatoms,vdmatoms,lookup_dir,db_dir,ifginfo,vdminfo,info,int_res)
-                df_lists.append(df)
-    return df_lists
+    threecode = constants.AAname[ifgresn]
+    try:
+        csv = pd.read_csv('/home/gpu/Sophia/STcombs/20171118/{}/csv/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
+    except:
+        csv = pd.read_csv('/home/gpu/Sophia/combs/st_wd/20180207db_combed_csvs/{}/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
+    vdmpdbinfo=pkl.load(open('/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/vdms_of_{}.pkl'.format(threecode),'rb')) 
+    csv = pd.merge(csv,vdmpdbinfo,left_index=True,right_index=True)
+    csv = csv[csv['resname_vdm']==vdmresn]
+    csv['in_contact'] = csv.apply(only_contacting,ifgatoms=ifgatoms,vdmatoms=vdmatoms,axis=1)
+    csv = csv[csv['in_contact']==True]
+    return csv # which is actually a pandas df
 
 def getcoords(row,info):
     ifgres,vdmres,ifgatoms,vdmatoms,query_atoms,lookup,targetresi,ignore = info
@@ -319,17 +275,26 @@ def get_order_of_atoms(item,ifgresn,vdmresn,ifgls,vdmls):
     lookupatoms = np.array(lookupatoms)
     return lookupatoms
 
+def num_mems_integrin_clus(mems):
+    '''find # of members in same cluster as integrin intrxn'''
+    for clus in mems:
+        for mem in clus:
+            if mem==0:
+                return len(clus)
+
 def score_interaction_and_dump(parsed,ifgresn,vdmresn,ifg_contact_atoms,vdm_contact_atoms,method,targetresi):
     ifgtype,vdmtype,ifginfo,vdminfo = get_ifg_vdm(parsed,ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,method)
+
     if ifgtype[1] != ['N','CA','C'] and ifgtype[1] != ['CA','C','O']:
         ifgresn = constants.AAname_rev[ifgtype[0]]
         vdmresn = constants.AAname_rev[vdmtype[0]]
         ifgatoms = ifgtype[1]
         vdmatoms = vdmtype[1]
 
-        lookupdf=pkl.load(open('/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/vdms_of_{}.pkl'.format(ifgtype[0]),'rb')) 
-        lookupdf = lookupdf[lookupdf['resname_vdm']==vdmresn]
-        
+        # only vdmresn vdms of ifgresn with ifgatoms
+        # and vdmatoms directly involved in interactions
+        lookupdf = filter_contact(ifgresn,vdmresn,ifgatoms,vdmatoms)
+
         integrin=pr.parsePDB('pymolintegrin.pdb')
         query = []
         for atom in ifgatoms:
@@ -347,6 +312,7 @@ def score_interaction_and_dump(parsed,ifgresn,vdmresn,ifg_contact_atoms,vdm_cont
         num_atoms = len(query)
         coords_ls = [item for item in lookupcoords if item[0] in lookupdf.index]
         lookupatoms_to_clus = []
+        lookupatoms_to_clus.append(query) # first element is always query
 
         for item in coords_ls:
             if len(item)==3:
@@ -368,30 +334,37 @@ def score_interaction_and_dump(parsed,ifgresn,vdmresn,ifg_contact_atoms,vdm_cont
                 rmsds.append([int(item[0]),100000])
 
         # get avg size of cluster
-        try:
-            D = pkl.load(open('./output_data/{}_{}{}_{}{}_pairwisematrix_{}.pkl'.format(targetresi,\
-                ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),'rb'))
+        try: # load saved matrices
+            try:
+                D = pkl.load(open('./output_data/{}_{}{}_{}{}_pairwisematrix_{}.pkl'.format(targetresi,\
+                    ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),'rb'))
+            except:
+                D = np.load('./output_data/{}_{}{}_{}{}_pairwisematrix_{}.npz'.format(targetresi,\
+                        ifginfo[1],ifgresn,vdminfo[1],vdmresn,method))
+                D = D['arr_0']
         except:
+            print('it is making fresh matrix')
             D = make_pairwise_rmsd_mat(np.array(lookupatoms_to_clus).astype('float32'))
             D = make_square(D)
-            pkl.dump(D, open('./output_data/{}_{}{}_{}{}_pairwisematrix_{}.pkl'.format(targetresi,\
-                ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),'wb'),protocol=4)
-            
+            try:
+                pkl.dump(D, open('./output_data/{}_{}{}_{}{}_pairwisematrix_{}.pkl'.format(targetresi,\
+                    ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),'wb'),protocol=4)
+            except:
+                np.savez_compressed('./output_data/{}_{}{}_{}{}_pairwisematrix_{}'.format(targetresi,\
+                    ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),D)
+
         adj_mat = make_adj_mat(D, 0.5)
         mems,centroids = greedy(adj_mat)
-        avg_size_clus = np.mean([len(x) for x in mems if len(x) > 1])
-        #avg_size_clus = np.mean([len(x) for x in mems])
+        avg_size_clus = np.median([len(x) for x in mems if len(x) > 1])
+        print('median',avg_size_clus)
+        return None
+        #avg_size_clus = np.median([len(x) for x in mems])
+        num_clustered = len(lookupatoms_to_clus)
 
-        # find out which cluster the integrin's interactamer is in (find centroid w/ lowest rmsd)
-        centroid_rmsds = []
-        for cent_ix in centroids: # cent is an index
-            cent = lookupatoms_to_clus[cent_ix]
-            rmsd = pr.calcRMSD(cent,query)
-            centroid_rmsds.append(rmsd)
-        min_ix = np.argmin(centroid_rmsds)
-        integrin_clus = len(mems[min_ix]) # size of cluster the integrin is in
-
-        rmsds.append([num_atoms,ifgatoms,vdmatoms,integrin_clus,avg_size_clus])
+        # find size of clus integrin is in (element 0 of coords array)
+        integrin_clus = num_mems_integrin_clus(mems)
+        
+        rmsds.append([num_atoms,ifgatoms,vdmatoms,integrin_clus,num_clustered,avg_size_clus])
         rmsds = np.array(rmsds)
         pkl.dump(rmsds, open('./output_data/{}_{}{}_{}{}_rmsds_{}.pkl'.format(targetresi,\
             ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),'wb'))
@@ -475,31 +448,20 @@ def output_pdbs(parsed,ifgresn,int_res,ifg_contact_atoms,vdm_contact_atoms,metho
                                 printout_interactamer.append(printout.select('chain X and resnum 10 and name {}'.format(atom)))
                             integrin_interactamer_prody = []
 
-                            #print(sum(integrin_interactamer))
                             integrin_interactamer = sum(integrin_interactamer[1:], integrin_interactamer[0])
                             printout_interactamer = sum(printout_interactamer[1:], printout_interactamer[0])
-                            #integrin_interactamer = integrin_interactamer.select('not name OXT')
-                            #printout_interactamer = printout_interactamer.select('not name OXT')
                             try:
                                 assert len(integrin_interactamer) == len(printout_interactamer)
 
-                                #''''#for index in range(len(integrin_interactamer)):
-                                #''''#    if list(integrin_interactamer)[index].getResname() != list(printout_interactamer)[index].getResname():
-                                #''''#        #print(integrin_interactamer[index].getResname())
-                                #''''#        #print(printout_interactamer[index].getResname())
-                                #''''#        print('diff residues',integrin_interactamer.getNames())
-                                #''''#        print('diff residues',printout_interactamer.getNames())
-                                #moved,transf = pr.superpose(printout_interactamer, integrin_interactamer)
                                 interact_res = printout.select('(chain X and resnum 10) or (chain Y and resnum 10)')
                                 interactamer_transf = pr.applyTransformation(transf, printout_interactamer)
-                                #interactamer_transf = pr.applyTransformation(transf, interact_res)
                                 outdir = '/home/gpu/Sophia/combs/st_wd/integrin_paper/output_data/pdbfiles/'
                                 
                                 threecode = constants.AAname[ifgresn]
-                                try:
-                                    contactsdf = pd.read_csv('/home/gpu/Sophia/STcombs/20171118/{}/csv/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
-                                except:
-                                    contactsdf = pd.read_csv('/home/gpu/Sophia/combs/st_wd/20180207db_combed_csvs/{}/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
+                                #try:
+                                #    contactsdf = pd.read_csv('/home/gpu/Sophia/STcombs/20171118/{}/csv/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
+                                #except:
+                                #    contactsdf = pd.read_csv('/home/gpu/Sophia/combs/st_wd/20180207db_combed_csvs/{}/{}_ifg_contact_vdm.csv'.format(threecode,threecode))
                                 
 
                                 pr.writePDB(outdir+'{}_{}{}_{}.pdb'.format(targetresi,int_res[0],int_res[1],row.name),interactamer_transf)

@@ -1,9 +1,0 @@
-python prevcombed_make_parsedvdms.py alanine > alaninelog & 
-python prevcombed_make_parsedvdms.py asparagine > asparaginelog & 
-python prevcombed_make_parsedvdms.py aspartate > aspartatelog & 
-python prevcombed_make_parsedvdms.py glutamine > glutaminelog &
-python prevcombed_make_parsedvdms.py glutamate > glutamatelog & 
-python prevcombed_make_parsedvdms.py glycine > glycinelog &
-python prevcombed_make_parsedvdms.py lysine > lysinelog & 
-python prevcombed_make_parsedvdms.py phenylalanine > phenylalaninelog & 
-python prevcombed_make_parsedvdms.py proline > prolinelog & 
