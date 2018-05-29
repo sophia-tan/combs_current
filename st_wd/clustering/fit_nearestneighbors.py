@@ -34,10 +34,10 @@ for typ in ['SC', 'N_CA', 'C_O']:
         pklf = pkl.load(open(path+pklfile, 'rb'))
         ifgcoords = pklf[:,6]
         flat = [x.flatten() for x in ifgcoords]
-        dist = 1.4/math.sqrt(1/num_atoms[ifg])
+        # commented out line below bc it's wrong
+        #dist = 1.4/math.sqrt(1/num_atoms[ifg])
         nbrs = NearestNeighbors(n_neighbors=1,metric='euclidean',radius=dist)
         vdmname = pklfile.split('_')[0]
         x = nbrs.fit(flat)
 
         pkl.dump(x, open(outpath+'NNfit_%s_with_%s_%s.pkl' %(ifg,vdmname,typ), 'wb'))
-
