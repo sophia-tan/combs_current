@@ -439,7 +439,8 @@ def output_pdbs(parsed,ifgresn,int_res,ifg_contact_atoms,vdm_contact_atoms,metho
                         printout.select('all').setResnums(10)
                         printout_interactamer = []
                         integrin_interactamer = []
-                        try: # skip the ones that have segment ids
+                        try: # skip the ones that have segment ids. will prob need to update this 
+                        # for the newly combed stuff
                             for atom in ifgatoms:
                                 integrin_interactamer.append(integrin.select('chain {} and resnum {} and name {}'.format(ifginfo[0],ifginfo[1],atom)))
                                 printout_interactamer.append(printout.select('chain Y and resnum 10 and name {}'.format(atom)))

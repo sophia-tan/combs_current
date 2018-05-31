@@ -3,6 +3,7 @@ import sys
 import traceback
 import copy
 from combs.apps import *
+from cluster_for_sophia import *
 import prody as pr
 import numpy as np
 import pickle as pkl
@@ -10,7 +11,6 @@ import pandas as pd
 from itertools import *
 sys.path.append('/home/gpu/Sophia/combs/src/')
 
-np.warnings.filterwarnings('ignore')
 
 def get_interacting_atoms(parsed, resi, resn):
     target = parsed.select('chain %s and resnum %s' % (resi[0], resi[1:]))
@@ -175,6 +175,140 @@ def filter_contact(ifgresn, vdmresn, ifgatoms, vdmatoms):
     csv = csv[csv['in_contact']]
     return num_all_vdms, csv  # which is actually a pandas df
 
+
+def getcoords(row, info):
+    ifgres, vdmres, ifgatoms, vdmatoms, query_atoms, lookup, targetresi, ignore = info
+    try:
+        try:
+            db_dir = '/home/gpu/Sophia/STcombs/20171118/database/reduce/'
+            par = pr.parsePDB(db_dir + row['pdb'] + 'H.pdb')
+        except BaseException:
+            db_dir = '/home/gpu/Sophia/combs/st_wd/20180207_db_molprobity_biolassem/'
+            par = pr.parsePDB(db_dir + row['pdb'] + 'H.pdb')
+
+        ifgchid, ifgresnum = row['chid_ifg'], row['resnum_ifg']
+        vdmchid, vdmresnum = row['chid_vdm'], row['resnum_vdm']
+        printout = copy.deepcopy(par)
+        printout = printout.select(
+            '(chain {} and resnum {}) or (chain {} and resnum {})'.format(
+                ifgchid, ifgresnum, vdmchid, vdmresnum))
+        printout.select(
+            'chain {} and resnum {}'.format(
+                ifgchid, ifgresnum)).setChids('Y')
+        printout.select(
+            'chain {} and resnum {}'.format(
+                vdmchid, vdmresnum)).setChids('X')
+        printout.select('all').setResnums(10)
+
+        ifgatoms = list(set(ifgatoms))
+        vdmatoms = list(set(vdmatoms))
+
+        # account for flipped residues
+        # 1) do ifg
+        lookupifg_list = []
+        lookupifg_list.append(ifgatoms)
+        if ifgres in constants.flip_names:
+            copyls = ifgatoms.copy()
+            for ix, atom in enumerate(ifgatoms):
+                for pair in constants.flip_names[ifgres]:
+                    if pair[0] not in ifgatoms and pair[1] not in ifgatoms:
+                        pass
+                    elif pair[0] in ifgatoms or pair[1] in ifgatoms:
+                        if atom in pair:
+                            if atom == pair[0]:
+                                copyls[ix] = pair[1]
+                            elif atom == pair[1]:
+                                copyls[ix] = pair[0]
+                    if copyls not in lookupifg_list:
+                        lookupifg_list.append(copyls)
+        # 2) do vdm
+        lookupvdm_list = []
+        lookupvdm_list.append(vdmatoms)
+        if vdmres in constants.flip_names:
+            copyls = vdmatoms.copy()
+            for ix, atom in enumerate(vdmatoms):
+                for pair in constants.flip_names[vdmres]:
+                    if pair[0] not in vdmatoms and pair[1] not in vdmatoms:
+                        pass
+                    elif pair[0] in vdmatoms or pair[1] in vdmatoms:
+                        if atom in pair:
+                            if atom == pair[0]:
+                                copyls[ix] = pair[1]
+                            elif atom == pair[1]:
+                                copyls[ix] = pair[0]
+                    if copyls not in lookupvdm_list:
+                        lookupvdm_list.append(copyls)
+
+        outdir = './output_data/pdbfiles/'
+        pr.writePDB(
+            outdir +
+            '{}_{}_{}_{}.pdb'.format(
+                targetresi,
+                ifgres,
+                vdmres,
+                row.name),
+            printout)
+
+        def get_lookup_relevant_atoms(
+                par,
+                ifgatoms,
+                ifgchid,
+                ifgresnum,
+                vdmatoms,
+                vdmchid,
+                vdmresnum):
+            coords = []
+            for atom in ifgatoms:
+                selection = par.select(
+                    'chain {} and resnum {} and name {}'.format(
+                        ifgchid, ifgresnum, atom))
+                coords.append(selection.getCoords()[0])
+            for atom in vdmatoms:
+                selection = par.select(
+                    'chain {} and resnum {} and name {}'.format(
+                        vdmchid, vdmresnum, atom))
+                coords.append(selection.getCoords()[0])
+            return np.array(coords)
+
+        compare_rmsds = []
+        query_atoms = np.array(query_atoms)
+        for ifgls in lookupifg_list:
+            for vdmls in lookupvdm_list:
+                lookupatoms = get_lookup_relevant_atoms(
+                    par, ifgls, ifgchid, ifgresnum, vdmls, vdmchid, vdmresnum)
+                moved, transf = pr.superpose(lookupatoms, query_atoms)
+                compare_rmsds.append(pr.calcRMSD(moved, query_atoms))
+        return [min(compare_rmsds), len(query_atoms)]
+
+    except Exception:
+        traceback.print_exc()
+        return np.nan
+
+# def get_coordslistforcluster(targetresi,parsed,ifg, vdm, ifgatoms,vdmatoms,lookup_dir,db_dir,ifginfo,vdminfo,info,int_res):
+#    try:
+#        pkl.load(open('./output_data/{}_{}_{}_ifg_{}_vdm_{}_coords.pkl'.format(targetresi,int_res[0],int_res[1],ifg,vdm),'rb'))
+#        return []
+#    except:
+#        query_atoms = []
+#        ifgatoms = list(set(ifgatoms))
+#        vdmatoms = list(set(vdmatoms))
+#        for atom in ifgatoms:
+#            selection = parsed.select('chain {} and resnum {} and name {}'.format(ifginfo[0],ifginfo[1],atom))
+#            query_atoms.append(selection.getCoords()[0])
+#        for atom in vdmatoms:
+#            selection = parsed.select('chain {} and resnum {} and name {}'.format(vdminfo[0],vdminfo[1],atom))
+#            query_atoms.append(selection.getCoords()[0])
+#
+#        # get coords for all combed vdms
+#        lookup = pkl.load(open(lookup_dir+'refinedvdms/vdms_of_{}.pkl'.format(ifg), 'rb'))
+#        lookup = lookup[lookup['resname_vdm']==constants.AAname_rev[vdm]]
+#        #lookup = lookup[:5] ###delete###
+#        info += [query_atoms, lookup, targetresi,int_res[0]]
+#        lookup['rmsds'] = lookup.apply(getcoords,info=info,axis=1)
+#        pkl.dump(lookup, open('./output_data/{}_{}_{}_ifg_{}_vdm_{}_coords.pkl'.format(targetresi,int_res[0],int_res[1],ifg,vdm),'wb'))
+#        return lookup
+
+
 def flip(atom_ls, resn):
     # account for flipped residues
     ls = []
@@ -210,12 +344,12 @@ def get_order_of_atoms(item, ifgresn, vdmresn, ifgls, vdmls):
     return lookupatoms
 
 
-#def num_mems_query_clus(mems):
-#    '''find # of members in same cluster as query intrxn'''
-#    for clus in mems:
-#        for mem in clus:
-#            if mem == 0:
-#                return len(clus)
+def num_mems_query_clus(mems):
+    '''find # of members in same cluster as query intrxn'''
+    for clus in mems:
+        for mem in clus:
+            if mem == 0:
+                return len(clus)
 
 
 def score_interaction_and_dump(
@@ -269,7 +403,6 @@ def score_interaction_and_dump(
             item for item in lookupcoords if item[0] in lookupdf.index]
         lookupatoms_to_clus = []
         lookupatoms_to_clus.append(query)  # first element is always query
-        counter = 0 # to keep count of how many pdbs are being output
 
         for item in coords_ls:
             if len(item) == 3:
@@ -286,64 +419,9 @@ def score_interaction_and_dump(
                 # item[0] is df index
                 rmsds.append([item[0], min(compare_rmsds)])
                 # get index of which one had min rmsd
-                for which_ind, each in enumerate(ifg_vdm_ind):
+                for each in ifg_vdm_ind:
                     if each[1] == min(compare_rmsds):
                         lookupatoms_to_clus.append(moved)
-                        ######################################################################## 
-                        #                   output pdb if low rmsd 
-                        ######################################################################## 
-                        if each[1] < cutoff and counter < 30 and which_ind==0: 
-                            # this is to ensure rmsd is below cutoff when not flipped
-                            # bc don't want to take care of that in prody to output pdb
-                            row = lookupdf.loc[item[0]]
-                            try:
-                                db_dir = '/home/gpu/Sophia/STcombs/20171118/database/reduce/'
-                                par = pr.parsePDB(db_dir+row['pdb']+'H.pdb')
-                            except:
-                                db_dir = '/home/gpu/Sophia/combs/st_wd/20180207_db_molprobity_biolassem/'
-                                par = pr.parsePDB(db_dir+row['pdb']+'H.pdb')
-    
-                            ifgchid, ifgresnum = row['chid_ifg'], row['resnum_ifg']
-                            vdmchid, vdmresnum = row['chid_vdm'], row['resnum_vdm']
-                            printout = copy.deepcopy(par)
-                            printout = printout.select(
-                                '(chain {} and resnum {}) or (chain {} and resnum {})'.format(
-                                ifgchid,ifgresnum,vdmchid,vdmresnum))
-                            printout.select('chain {} and resnum {}'.format(ifgchid,ifgresnum)).setChids('Y')
-                            printout.select('chain {} and resnum {}'.format(vdmchid,vdmresnum)).setChids('X')
-                            printout.select('all').setResnums(10)
-                            printout_interactamer = []
-                            integrin_interactamer = []
-                            try: # skip the ones that have segment ids. will prob need to update this 
-                            # for the newly combed stuff
-                                for atom in ifgatoms:
-                                    integrin_interactamer.append(parsed.select('chain {} and resnum {} and name {}'.format(ifginfo[0],ifginfo[1],atom)))
-                                    printout_interactamer.append(printout.select('chain Y and resnum 10 and name {}'.format(atom)))
-                                for atom in vdmatoms:
-                                    integrin_interactamer.append(parsed.select('chain {} and resnum {} and name {}'.format(vdminfo[0],vdminfo[1],atom)))
-                                    printout_interactamer.append(printout.select('chain X and resnum 10 and name {}'.format(atom)))
-                                integrin_interactamer_prody = []
-    
-                                integrin_interactamer = sum(integrin_interactamer[1:], integrin_interactamer[0])
-                                printout_interactamer = sum(printout_interactamer[1:], printout_interactamer[0])
-                                try:
-                                    assert len(integrin_interactamer) == len(printout_interactamer)
-    
-                                    interact_res = printout.select('(chain X and resnum 10) or (chain Y and resnum 10)')
-                                    interactamer_transf = pr.applyTransformation(transf, printout_interactamer)
-                                    outdir = './output_data/pdbfiles/'
-                                    
-                                    threecode = constants.AAname[ifgresn]
-    
-                                    pr.writePDB(outdir+'{}_{}{}_{}{}_{}_{}'.format(
-                                        targetresi,ifginfo[1],ifgresn,vdminfo[1],vdmresn,cutoff,row.name),
-                                        interactamer_transf)
-                                    counter += 1
-                                except:
-                                    pass
-                            except:
-                                traceback.print_exc()
-                                pass
 
             else:
                 rmsds.append([int(item[0]), 100000])
@@ -351,12 +429,18 @@ def score_interaction_and_dump(
         # count how many NNs the query intrxn has
         num_nn, norm_metrics = get_NN(lookupatoms_to_clus, 
             num_atoms, rmsds, query, cutoff, num_all_vdms)
-        return targetresi, ifginfo[1], ifgresn, vdminfo[1], vdmresn,\
-            cutoff, method, ifgatoms, vdmatoms, num_nn, norm_metrics
+        output_info = [num_nn, norm_metrics]
+        pkl.dump(output_info, 
+            open('./output_data/{}_{}{}_{}{}_matches_{}_{}.pkl'.format(
+            targetresi,ifginfo[1],ifgresn,vdminfo[1],vdmresn,
+            method,cutoff),'wb'))
+
 
 def get_NN(lookupatoms_to_clus, num_atoms, rmsds, query, cutoff, num_all_vdms):
     flat = [x.reshape(-1,) for x in lookupatoms_to_clus]
     euclid_dist = cutoff * np.sqrt(num_atoms)
+    print('euclidean distance: {} for # atoms: {} with rmsd: {}'
+            .format(euclid_dist,num_atoms,cutoff))
     nbrs = NearestNeighbors(
         n_neighbors=1,
         metric='euclidean',
@@ -394,3 +478,30 @@ def get_NN(lookupatoms_to_clus, num_atoms, rmsds, query, cutoff, num_all_vdms):
         np.median(NNs), np.median(NNs_no_sing)]
     norm_metrics.append(exp_list)
     return num_nn, norm_metrics
+
+#            try:
+#            except:
+#                np.savez_compressed('./output_data/{}_{}{}_{}{}_pairwisematrix_{}'.format(targetresi,\
+#                    ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),D)
+#
+#        adj_mat = make_adj_mat(D, 0.5)
+#        mems,centroids = greedy(adj_mat)
+#        avg_clus_size_wo_singles = np.mean([len(x) for x in mems if len(x) > 1])
+#        avg_clus_size_with_singles = np.mean([len(x) for x in mems])
+#        med_clus_size_wo_singles = np.median([len(x) for x in mems if len(x) > 1])
+#        med_clus_size_with_singles = np.median([len(x) for x in mems])
+#        num_clustered = len(lookupatoms_to_clus) # have direct intrxns w/ ifg
+#
+#        # find size of clus integrin is in (element 0 of coords array)
+#        integrin_clus = num_mems_integrin_clus(mems)
+#
+#        rmsds.append([num_atoms,ifgatoms,vdmatoms,integrin_clus,num_clustered,\
+#        avg_clus_size_wo_singles, avg_clus_size_with_singles, med_clus_size_wo_singles,\
+#        med_clus_size_with_singles])
+#        rmsds = np.array(rmsds)
+#        pkl.dump(rmsds, open('./output_data/{}_{}{}_{}{}_rmsds_{}.pkl'.format(targetresi,\
+#            ifginfo[1],ifgresn,vdminfo[1],vdmresn,method),'wb'))
+#        return rmsds
+#    else:
+#        print('ERROR',ifginfo,ifgresn,vdminfo,vdmresn)
+#
