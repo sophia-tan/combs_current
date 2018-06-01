@@ -13,7 +13,11 @@ sys.path.append('/home/gpu/Sophia/combs/src/')
 np.warnings.filterwarnings('ignore')
 
 def get_interacting_atoms(parsed, resi, resn):
-    target = parsed.select('chain %s and resnum %s' % (resi[0], resi[1:]))
+    if resi[1:].isdigit(): # removes all insertion codes
+        target = parsed.select('chain %s and resnum %s_' % (resi[0], resi[1:]))
+    else: # has insertion code
+        target = parsed.select('chain %s and resnum %s' % (resi[0], resi[1:].upper()))
+
     assert len(list(set(target.getResnames()))) == 1
     assert constants.one_letter_code[target.getResnames()[0]] == resn
 
@@ -80,9 +84,10 @@ def get_ifg_vdm(
 
     if method == 'planar_group':
         bb = ['N CA C', 'CA C O']
+        cacbcg = ['CA CB CG']
         ifgatoms = ''
         vdmatoms = ''
-        for typ in [bb, constants.planar_atoms[ifgresn]]:
+        for typ in [bb, constants.planar_atoms[ifgresn], cacbcg]:
             for element in typ:
                 element = element.split(' ')
                 if len(
@@ -209,15 +214,6 @@ def get_order_of_atoms(item, ifgresn, vdmresn, ifgls, vdmls):
     lookupatoms = np.array(lookupatoms)
     return lookupatoms
 
-
-#def num_mems_query_clus(mems):
-#    '''find # of members in same cluster as query intrxn'''
-#    for clus in mems:
-#        for mem in clus:
-#            if mem == 0:
-#                return len(clus)
-
-
 def score_interaction_and_dump(
         parsed,
         ifgresn,
@@ -225,7 +221,7 @@ def score_interaction_and_dump(
         ifg_contact_atoms,
         vdm_contact_atoms,
         method,
-        targetresi, cutoff):
+        targetresi, cutoff, pdbix, pdbname):
     cutoff = float(cutoff)
     ifgtype, vdmtype, ifginfo, vdminfo = get_ifg_vdm(
         parsed, ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms, method)
@@ -239,7 +235,6 @@ def score_interaction_and_dump(
         # filter for only vdmresn vdms of ifgresn with ifgatoms
         # and vdmatoms directly involved in interactions
         num_all_vdms, lookupdf = filter_contact(ifgresn, vdmresn, ifgatoms, vdmatoms)
-
         query = []
         for atom in ifgatoms:
             query.append(
@@ -259,7 +254,7 @@ def score_interaction_and_dump(
         query = np.array(query)
         lookupcoords = pkl.load(open(
             '/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/coords_of_{}.pkl'.format(ifgtype[0]), 'rb'))
-        # lookupcoords = lookupcoords[:100] # delete
+        #lookupcoords = lookupcoords[:50] # delete
 
         ifglists = flip(ifgatoms, ifgresn)
         vdmlists = flip(vdmatoms, vdmresn)
@@ -268,9 +263,7 @@ def score_interaction_and_dump(
         coords_ls = [
             item for item in lookupcoords if item[0] in lookupdf.index]
         lookupatoms_to_clus = []
-        lookupatoms_to_clus.append(query)  # first element is always query
         counter = 0 # to keep count of how many pdbs are being output
-
         for item in coords_ls:
             if len(item) == 3:
                 compare_rmsds = []
@@ -288,7 +281,7 @@ def score_interaction_and_dump(
                 # get index of which one had min rmsd
                 for which_ind, each in enumerate(ifg_vdm_ind):
                     if each[1] == min(compare_rmsds):
-                        lookupatoms_to_clus.append(moved)
+                        lookupatoms_to_clus.append(each[0])
                         ######################################################################## 
                         #                   output pdb if low rmsd 
                         ######################################################################## 
@@ -335,9 +328,10 @@ def score_interaction_and_dump(
                                     
                                     threecode = constants.AAname[ifgresn]
     
-                                    pr.writePDB(outdir+'{}_{}{}_{}{}_{}_{}'.format(
-                                        targetresi,ifginfo[1],ifgresn,vdminfo[1],vdmresn,cutoff,row.name),
-                                        interactamer_transf)
+                                    pr.writePDB(outdir+'{}_{}_{}_{}{}_{}{}_{}_{}'.format(
+                                        pdbix, pdbname, targetresi,ifginfo[1],
+                                        ifgresn,vdminfo[1],vdmresn,cutoff,
+                                        row.name), interactamer_transf)
                                     counter += 1
                                 except:
                                     pass
@@ -351,8 +345,8 @@ def score_interaction_and_dump(
         # count how many NNs the query intrxn has
         num_nn, norm_metrics = get_NN(lookupatoms_to_clus, 
             num_atoms, rmsds, query, cutoff, num_all_vdms)
-        return targetresi, ifginfo[1], ifgresn, vdminfo[1], vdmresn,\
-            cutoff, method, ifgatoms, vdmatoms, num_nn, norm_metrics
+        return ifginfo[0], ifginfo[1], ifgresn, vdminfo[0], vdminfo[1],\
+            vdmresn, ifgatoms, vdmatoms, num_nn, norm_metrics
 
 def get_NN(lookupatoms_to_clus, num_atoms, rmsds, query, cutoff, num_all_vdms):
     flat = [x.reshape(-1,) for x in lookupatoms_to_clus]

@@ -1,3 +1,5 @@
+# troubleshoot by doing just one target resi
+
 import sys
 sys.path.append('/home/gpu/Sophia/combs/src/')
 from combs.apps import *
@@ -7,24 +9,23 @@ from itertools import *
 from Scoring import *
 from Functions import *
 
-script, pdb_index, method = sys.argv
+script, pdb_index, inputres, method = sys.argv
 ''' @pdb_index is to distinguish pdbs in the dataset
      (index of element in the pickle file lists that contain
      that pdb) '''
 
-try:
-    pkl.load(open('./output_data/pdb_ix_{}_matches.pkl'.
-        format(pdb_index),'rb'))
-except:
-    mutation_data = pkl.load(open('mutation_data.pkl','rb'))
-    pdb_resdict = mutation_data[0][int(pdb_index)]
-    pdbname, pdb_resdict = pdb_resdict[0], pdb_resdict[1]
-                    
-    list_for_df = [] # will ultimately dump this df in output dir
-    parsed = pr.parsePDB(pdbname)
-    print('#####################################')
-    print(pdb_index, pdbname)
-    for resi, resn_list in pdb_resdict.items():
+mutation_data = pkl.load(open('mutation_data.pkl','rb'))
+lookup_dir = '/home/gpu/Sophia/combs/st_wd/Lookups/'
+db_dir = '/home/gpu/Sophia/STcombs/20171118/database/reduce/'
+pdb_resdict = mutation_data[0][int(pdb_index)]
+pdb_datadf = mutation_data[1][int(pdb_index)]
+pdbname, pdb_resdict = pdb_resdict[0], pdb_resdict[1]
+                
+list_for_df = [] # will ultimately dump this df in output dir
+parsed = pr.parsePDB(pdbname)
+for resi, resn_list in pdb_resdict.items():
+    if resi== inputres:
+        print('yas')
         # for each target res, find the residues w/in 3.5 and 4.8A
         interacting_atoms = get_interacting_atoms(parsed, resi, resn_list[0])
         # list of list where inner list is [targetatomindex, int_resatomindex]
@@ -43,14 +44,12 @@ except:
                 .getResindices()[0] == int_resindex]
             ######### treat targetres as ifg ############
             # int_res is resname
-            if int_res[1] != 'HOH' and resn_list[0] not in ['W','C','M'] \
-                and int_res[1] in constants.planar_atoms.keys(): # need to fix for newly combed
+            if int_res[1] != 'HOH' and resn_list[0] not in ['W','C','M']: # need to fix for newly combed
             #if int_res[1] != 'HOH':
                 for rmsd in [.4,.5]:
                     matches = score_interaction_and_dump(parsed,
                         constants.three_letter_code[resn_list[0]], int_res, target_res_atoms, 
-                        int_res_atoms,method=method,targetresi=resi, cutoff=rmsd, 
-                        pdbix=pdb_index, pdbname=pdbname)
+                        int_res_atoms,method=method,targetresi=resi, cutoff=rmsd)
                     if matches != None:
                         ifgchid, ifgresi, ifgresn, vdmchid, vdmresi, vdmresn, ifgatoms, \
                             vdmatoms, num_nn, norm_metrics = matches
@@ -80,6 +79,3 @@ except:
                     'num directly interacting vdms', 'avg num NNs', 
                     'avg num NNs w/o singles', 'median num NNs', 
                     'median num NNs w/o singles', 'method']))
-    outputdf = pd.DataFrame(list_for_df)
-    pkl.dump(outputdf,open('./output_data/pdb_ix_{}_matches.pkl'.
-        format(pdb_index),'wb'))
