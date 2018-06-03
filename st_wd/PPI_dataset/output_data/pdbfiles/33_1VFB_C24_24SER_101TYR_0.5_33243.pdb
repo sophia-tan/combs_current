@@ -1,0 +1,11 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...nd resnum 151))') + (Selection '(chain Y and re...nd resnum 151))')) + (Selection '(chain Y and re...nd resnum 151))')) + (Selection '(chain X and re...nd resnum 151))')) + (Selection '(chain X and re...nd resnum 151))')) + (Selection '(chain X and re...nd resnum 151))')) + (Selection '(chain X and re...nd resnum 151))')) + (Selection '(chain X and re...nd resnum 151))')) + (Selection '(chain X and re...nd resnum 151))')) + (Selection '(chain X and re...nd resnum 151))')
+ATOM      1  CA  SER Y  10      45.631  -7.141   1.790  1.00 11.27           C
+ATOM      2  CB  SER Y  10      45.186  -6.957   0.353  1.00 13.90           C
+ATOM      3  OG  SER Y  10      43.826  -7.041   0.194  1.00 19.18           O
+ATOM      4  CG  TYR X  10      40.458  -6.173  -2.953  1.00 11.38           C
+ATOM      5  CD1 TYR X  10      39.230  -6.741  -3.209  1.00 13.01           C
+ATOM      6  CD2 TYR X  10      41.376  -6.910  -2.234  1.00 13.27           C
+ATOM      7  CE1 TYR X  10      38.884  -8.001  -2.777  1.00 13.38           C
+ATOM      8  CE2 TYR X  10      41.051  -8.174  -1.802  1.00 14.91           C
+ATOM      9  CZ  TYR X  10      39.813  -8.721  -2.065  1.00 16.43           C
+ATOM     10  OH  TYR X  10      39.475 -10.001  -1.636  1.00 20.22           O

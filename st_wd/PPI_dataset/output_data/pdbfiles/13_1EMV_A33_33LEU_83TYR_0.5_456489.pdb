@@ -1,0 +1,25 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...nd resnum 165))') + (Selection '(chain Y and re...nd resnum 165))')) + (Selection '(chain Y and re...nd resnum 165))')) + (Selection '(chain X and re...nd resnum 165))')) + (Selection '(chain X and re...nd resnum 165))')) + (Selection '(chain X and re...nd resnum 165))')) + (Selection '(chain X and re...nd resnum 165))')) + (Selection '(chain X and re...nd resnum 165))')) + (Selection '(chain X and re...nd resnum 165))')) + (Selection '(chain X and re...nd resnum 165))')
+MODEL        1
+ATOM      1  CD1 LEU Y  10      -3.332   0.503  49.518  0.50 27.22           C
+ATOM      2  CG  LEU Y  10      -2.527   1.135  48.344  0.50 29.91           C
+ATOM      3  CD2 LEU Y  10      -3.406   1.310  47.077  0.50 26.01           C
+ATOM      4  CG  TYR X  10      -4.365   5.690  43.058  0.50 13.51           C
+ATOM      5  CD1 TYR X  10      -5.131   6.866  43.161  0.50 14.36           C
+ATOM      6  CD2 TYR X  10      -4.405   4.785  44.106  0.50 11.67           C
+ATOM      7  CE1 TYR X  10      -5.929   7.116  44.291  0.50 14.74           C
+ATOM      8  CE2 TYR X  10      -5.178   5.005  45.214  0.50 12.09           C
+ATOM      9  CZ  TYR X  10      -5.944   6.168  45.316  0.50 13.73           C
+ATOM     10  OH  TYR X  10      -6.762   6.394  46.413  0.50 18.02           O
+ENDMDL
+MODEL        2
+ATOM      1  CD1 LEU Y  10       0.000   0.000   0.000  0.50 27.22           C
+ATOM      2  CG  LEU Y  10       0.000   0.000   0.000  0.50 29.91           C
+ATOM      3  CD2 LEU Y  10       0.000   0.000   0.000  0.50 26.01           C
+ATOM      4  CG  TYR X  10       0.000   0.000   0.000  0.50 13.51           C
+ATOM      5  CD1 TYR X  10       0.000   0.000   0.000  0.50 14.36           C
+ATOM      6  CD2 TYR X  10       0.000   0.000   0.000  0.50 11.67           C
+ATOM      7  CE1 TYR X  10       0.000   0.000   0.000  0.50 14.74           C
+ATOM      8  CE2 TYR X  10       0.000   0.000   0.000  0.50 12.09           C
+ATOM      9  CZ  TYR X  10       0.000   0.000   0.000  0.50 13.73           C
+ATOM     10  OH  TYR X  10       0.000   0.000   0.000  0.50 18.02           O
+ENDMDL

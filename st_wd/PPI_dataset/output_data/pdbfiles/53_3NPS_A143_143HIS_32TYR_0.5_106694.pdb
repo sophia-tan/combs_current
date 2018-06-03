@@ -1,0 +1,57 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...nd resnum 159))') + (Selection '(chain Y and re...nd resnum 159))')) + (Selection '(chain Y and re...nd resnum 159))')) + (Selection '(chain Y and re...nd resnum 159))')) + (Selection '(chain Y and re...nd resnum 159))')) + (Selection '(chain X and re...nd resnum 159))')) + (Selection '(chain X and re...nd resnum 159))')) + (Selection '(chain X and re...nd resnum 159))')) + (Selection '(chain X and re...nd resnum 159))')) + (Selection '(chain X and re...nd resnum 159))')) + (Selection '(chain X and re...nd resnum 159))')) + (Selection '(chain X and re...nd resnum 159))')
+MODEL        1
+ATOM      1  CG  HIS Y  10     -40.219  22.695  62.780  0.06 25.61           C
+ATOM      2  ND1 HIS Y  10     -40.811  23.545  61.859  0.06 25.51           N
+ATOM      3  CE1 HIS Y  10     -42.001  23.069  61.522  0.06 29.33           C
+ATOM      4  NE2 HIS Y  10     -42.201  21.940  62.186  0.06 29.80           N
+ATOM      5  CD2 HIS Y  10     -41.101  21.687  62.983  0.06 24.72           C
+ATOM      6  CG  TYR X  10     -40.704  26.043  55.945  0.06 19.10           C
+ATOM      7  CD1 TYR X  10     -40.159  27.137  56.626  0.06 17.31           C
+ATOM      8  CD2 TYR X  10     -41.104  24.926  56.706  0.06 17.29           C
+ATOM      9  CE1 TYR X  10     -40.010  27.131  58.027  0.06 19.51           C
+ATOM     10  CE2 TYR X  10     -40.964  24.919  58.138  0.06 19.96           C
+ATOM     11  CZ  TYR X  10     -40.413  26.023  58.775  0.06 18.26           C
+ATOM     12  OH  TYR X  10     -40.204  26.050  60.135  0.06 17.72           O
+ENDMDL
+MODEL        2
+ATOM      1  CG  HIS Y  10      60.155  23.999   0.099  0.06 25.61           C
+ATOM      2  ND1 HIS Y  10      59.537  24.545   1.359  0.06 25.51           N
+ATOM      3  CE1 HIS Y  10      58.642  25.547   1.548  0.06 29.33           C
+ATOM      4  NE2 HIS Y  10      59.163  24.745   3.529  0.06 29.80           N
+ATOM      5  CD2 HIS Y  10      59.849  24.065   2.619  0.06 24.72           C
+ATOM      6  CG  TYR X  10      64.907  25.360   8.217  0.06 19.10           C
+ATOM      7  CD1 TYR X  10      64.184  24.587   7.119  0.06 17.31           C
+ATOM      8  CD2 TYR X  10      64.654  23.353   6.661  0.06 17.29           C
+ATOM      9  CE1 TYR X  10      62.992  25.072   6.565  0.06 19.51           C
+ATOM     10  CE2 TYR X  10      63.934  22.605   5.640  0.06 19.96           C
+ATOM     11  CZ  TYR X  10      62.259  24.325   5.563  0.06 18.26           C
+ATOM     12  OH  TYR X  10      62.741  23.113   5.113  0.06 17.72           O
+ENDMDL
+MODEL        3
+ATOM      1  CG  HIS Y  10      60.009  25.487   1.041  0.06 25.61           C
+ATOM      2  ND1 HIS Y  10      60.717  25.530   2.223  0.06 25.51           N
+ATOM      3  CE1 HIS Y  10      59.987  26.137   3.145  0.06 29.33           C
+ATOM      4  NE2 HIS Y  10      58.838  26.501   2.595  0.06 29.80           N
+ATOM      5  CD2 HIS Y  10      58.834  26.115   1.279  0.06 24.72           C
+ATOM      6  CG  TYR X  10      64.009  24.660   6.840  0.06 19.10           C
+ATOM      7  CD1 TYR X  10      64.587  23.529   6.259  0.06 17.31           C
+ATOM      8  CD2 TYR X  10      62.702  25.006   6.440  0.06 17.29           C
+ATOM      9  CE1 TYR X  10      63.891  22.753   5.280  0.06 19.51           C
+ATOM     10  CE2 TYR X  10      61.984  24.216   5.467  0.06 19.96           C
+ATOM     11  CZ  TYR X  10      62.595  23.111   4.901  0.06 18.26           C
+ATOM     12  OH  TYR X  10      61.947  22.373   3.935  0.06 17.72           O
+ENDMDL
+MODEL        4
+ATOM      1  CG  HIS Y  10      58.539  25.056   1.241  0.06 25.61           C
+ATOM      2  ND1 HIS Y  10      58.627  24.213   2.329  0.06 25.51           N
+ATOM      3  CE1 HIS Y  10      58.009  24.761   3.366  0.06 29.33           C
+ATOM      4  NE2 HIS Y  10      57.524  25.929   2.990  0.06 29.80           N
+ATOM      5  CD2 HIS Y  10      57.850  26.143   1.665  0.06 24.72           C
+ATOM      6  CG  TYR X  10      63.659  24.882   6.830  0.06 19.10           C
+ATOM      7  CD1 TYR X  10      63.505  23.505   6.605  0.06 17.31           C
+ATOM      8  CD2 TYR X  10      62.950  25.768   5.998  0.06 17.29           C
+ATOM      9  CE1 TYR X  10      62.671  23.030   5.569  0.06 19.51           C
+ATOM     10  CE2 TYR X  10      62.135  25.298   4.953  0.06 19.96           C
+ATOM     11  CZ  TYR X  10      62.006  23.919   4.747  0.06 18.26           C
+ATOM     12  OH  TYR X  10      61.302  23.418   3.669  0.06 17.72           O
+ENDMDL

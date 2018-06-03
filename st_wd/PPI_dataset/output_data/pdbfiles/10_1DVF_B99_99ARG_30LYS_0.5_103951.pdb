@@ -1,0 +1,8 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...and resnum 67))') + (Selection '(chain Y and re...and resnum 67))')) + (Selection '(chain Y and re...and resnum 67))')) + (Selection '(chain Y and re...and resnum 67))')) + (Selection '(chain X and re...and resnum 67))')) + (Selection '(chain X and re...and resnum 67))')) + (Selection '(chain X and re...and resnum 67))')
+ATOM      1  NE  ARG Y  10      28.583 -16.139   6.384  1.00 15.87           N
+ATOM      2  CZ  ARG Y  10      28.909 -16.646   7.566  1.00 18.96           C
+ATOM      3  NH1 ARG Y  10      29.684 -15.952   8.397  1.00 17.52           N
+ATOM      4  NH2 ARG Y  10      28.439 -17.823   7.949  1.00 19.47           N
+ATOM      5  CA  LYS X  10      30.444 -23.444   7.236  1.00 19.95           C
+ATOM      6  C   LYS X  10      29.599 -22.233   6.813  1.00 18.93           C
+ATOM      7  O   LYS X  10      29.733 -21.133   7.372  1.00 18.87           O

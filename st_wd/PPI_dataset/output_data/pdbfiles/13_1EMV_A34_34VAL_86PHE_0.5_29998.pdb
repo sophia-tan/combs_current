@@ -1,0 +1,10 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...nd resnum 125))') + (Selection '(chain Y and re...nd resnum 125))')) + (Selection '(chain Y and re...nd resnum 125))')) + (Selection '(chain X and re...nd resnum 125))')) + (Selection '(chain X and re...nd resnum 125))')) + (Selection '(chain X and re...nd resnum 125))')) + (Selection '(chain X and re...nd resnum 125))')) + (Selection '(chain X and re...nd resnum 125))')) + (Selection '(chain X and re...nd resnum 125))')
+ATOM      1  CG1 VAL Y  10       4.183   4.874  49.338  1.00 33.61           C
+ATOM      2  CB  VAL Y  10       2.691   5.033  49.088  1.00 35.61           C
+ATOM      3  CG2 VAL Y  10       2.137   3.797  48.376  1.00 34.79           C
+ATOM      4  CG  PHE X  10       2.297  -1.083  44.845  1.00 39.08           C
+ATOM      5  CD1 PHE X  10       0.941  -0.788  44.722  1.00 39.17           C
+ATOM      6  CD2 PHE X  10       3.020  -0.499  45.880  1.00 37.95           C
+ATOM      7  CE1 PHE X  10       0.311   0.078  45.621  1.00 39.38           C
+ATOM      8  CE2 PHE X  10       2.401   0.370  46.784  1.00 40.91           C
+ATOM      9  CZ  PHE X  10       1.045   0.657  46.653  1.00 38.92           C

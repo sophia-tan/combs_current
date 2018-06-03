@@ -1,0 +1,7 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...nd resnum 544))') + (Selection '(chain Y and re...nd resnum 544))')) + (Selection '(chain Y and re...nd resnum 544))')) + (Selection '(chain X and re...nd resnum 544))')) + (Selection '(chain X and re...nd resnum 544))')) + (Selection '(chain X and re...nd resnum 544))')
+ATOM      1  CB  PRO Y  10     -20.472  68.169  44.390  1.00 18.39         A C
+ATOM      2  CG  PRO Y  10     -19.124  68.776  44.415  1.00 21.45         A C
+ATOM      3  CD  PRO Y  10     -18.378  68.036  43.287  1.00 19.48         A C
+ATOM      4  CG  MET X  10     -22.760  73.372  44.353  1.00 25.29         A C
+ATOM      5  SD  MET X  10     -22.807  72.645  46.014  1.00 27.75         A S
+ATOM      6  CE  MET X  10     -21.359  71.592  45.875  1.00 24.79         A C
