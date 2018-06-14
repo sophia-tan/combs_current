@@ -1,4 +1,6 @@
-''' print bash commands to run calc_rmsds'''
+''' THIS SCRIPT PRINTS BASH COMMANDS TO RUN CALC_RMSDS
+SO I DON'T HAVE TO TYPE IN ALL THE NUMBERS BY HAND '''
+
 
 import pandas as pd
 from Functions import *

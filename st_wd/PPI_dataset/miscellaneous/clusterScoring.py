@@ -8,6 +8,7 @@ import numpy as np
 import pickle as pkl
 import pandas as pd
 from itertools import *
+from cluster_for_sophia import *
 sys.path.append('/home/gpu/Sophia/combs/src/')
 
 np.warnings.filterwarnings('ignore')
@@ -345,6 +346,36 @@ def score_interaction_and_dump(
         # count how many NNs the query intrxn has
         num_nn, norm_metrics = get_NN(lookupatoms_to_clus, 
             num_atoms, rmsds, query, cutoff, num_all_vdms)
+        print('num NN')
+        print(num_nn)
+
+        exp_list = norm_metrics[-1]
+        print('======= FOR NEAREST NEIGHBORS ==========')
+        print('avg with single')
+        print(exp_list[0])
+        print('avg without single')
+        print(exp_list[1])
+        print('median with single')
+        print(exp_list[2])
+        print('median without single')
+        print(exp_list[3])
+
+        # do greedy clustering
+        D = make_pairwise_rmsd_mat(np.array(lookupatoms_to_clus).astype('float32'))
+        D = make_square(D)
+        adj_mat = make_adj_mat(D, 0.5)
+        mems,centroids = greedy(adj_mat)
+        print('======= FOR GREEDY CLUS ==========')
+        print('avg with singletons')
+        print(np.mean([len(x) for x in mems]))
+        print('avg without singletons')
+        print(np.mean([len(x) for x in mems if len(x) > 1]))
+        print('median with singletons')
+        print(np.median([len(x) for x in mems]))
+        print('median without singletons')
+        print(np.median([len(x) for x in mems if len(x) > 1]))
+
+
         return ifginfo[0], ifginfo[1], ifgresn, vdminfo[0], vdminfo[1],\
             vdmresn, ifgatoms, vdmatoms, num_nn, norm_metrics
 

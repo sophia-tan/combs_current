@@ -5,12 +5,15 @@ import prody as pr
 import numpy as np, pickle as pkl, pandas as pd
 from itertools import *
 from Scoring import *
-from Functions import *
+from PPI_Functions import *
 
 script, pdb_index, method = sys.argv
 ''' @pdb_index is to distinguish pdbs in the dataset
      (index of element in the pickle file lists that contain
-     that pdb) '''
+     that pdb) 
+    @method could be 'sc' or 'planar_group_no_bb'. We want to ignore ifg bb 
+     interactions bc we're looking at mutations to ala, and bb interactions 
+     don't change '''
 
 try:
     pkl.load(open('./output_data/pdb_ix_{}_matches.pkl'.
@@ -22,30 +25,30 @@ except:
                     
     list_for_df = [] # will ultimately dump this df in output dir
     parsed = pr.parsePDB(pdbname)
+    parsed = parsed.select('not water')
     print('#####################################')
     print(pdb_index, pdbname)
+    # For each target res, find the residues w/in 3.5 and 4.8A
     for resi, resn_list in pdb_resdict.items():
-        # for each target res, find the residues w/in 3.5 and 4.8A
         interacting_atoms = get_interacting_atoms(parsed, resi, resn_list[0])
         # list of list where inner list is [targetatomindex, int_resatomindex]
-        interacting_resindices = set(list([parsed.select('index %s'%x[1]).getResindices()[0] 
-            for x in interacting_atoms]))
+        interacting_resindices = set(list([parsed.select('index %s'%
+            x[1]).getResindices()[0] for x in interacting_atoms]))
         print('--------------------')
         print('Target Res', resi, resn_list)
         for int_resindex in interacting_resindices: 
-            int_res = [int_resindex,parsed.select('resindex {}'.format(int_resindex)).getResnames()[0]]
+            int_res = [int_resindex, parsed.select('resindex {}'.format(
+                int_resindex)).getResnames()[0]]
             print('Interacting Res', int_res)
-            # interacting_atoms has all the indices for all the atoms the target resn
-            # interacts with, but we only want to look at the ones for this int_res
-            int_res_atoms = [x[1] for x in interacting_atoms if parsed.select('index %s'%x[1]).
-                getResindices()[0] == int_resindex]
-            target_res_atoms = [x[0] for x in interacting_atoms if parsed.select('index %s'%x[1])
-                .getResindices()[0] == int_resindex]
-            ######### treat targetres as ifg ############
-            # int_res is resname
-            if int_res[1] != 'HOH' and resn_list[0] not in ['W','C','M'] \
-                and int_res[1] in constants.planar_atoms.keys(): # need to fix for newly combed
-            #if int_res[1] != 'HOH':
+            # Keep only the interacting atoms that interact w/ this int_res
+            # (instead of all interacting atoms that interact w/ whole target res)
+            int_res_atoms = [x[1] for x in interacting_atoms if parsed.select(
+                'index %s'%x[1]).getResindices()[0] == int_resindex]
+            target_res_atoms = [x[0] for x in interacting_atoms if parsed.select(
+                'index %s'%x[1]).getResindices()[0] == int_resindex]
+            # ======= treat targetres as ifg ==========
+            # Reminder: int_res is resname
+            if int_res[1] in constants.planar_atoms.keys(): 
                 for rmsd in [.4,.5]:
                     matches = score_interaction_and_dump(parsed,
                         constants.three_letter_code[resn_list[0]], int_res, target_res_atoms, 

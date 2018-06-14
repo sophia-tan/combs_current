@@ -1,3 +1,5 @@
+# THIS SCRIPT GENERATES RESDICTS
+
 import pandas as pd, pickle as pkl
 from Functions import *
 

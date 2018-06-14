@@ -7,18 +7,14 @@ from sys import argv
 
 script, ifg_res = argv
 
-#csv_dir = '/home/gpu/Sophia/combs/st_wd/20180207db_combed_csvs/%s/'%ifg_res
-#db_pdbs = '/home/gpu/Sophia/combs/st_wd/20180207_db_molprobity_biolassem/'
-
-csv_dir = '/home/gpu/Sophia/STcombs/20171118/{}/csv/'.format(ifg_res)
-db_pdbs = '/home/gpu/Sophia/STcombs/20171118/database/reduce/'
+csv_dir = '/home/gpu/Sophia/combs/st_wd/20180207_combed_csvs/%s/'%ifg_res
+db_pdbs = '/home/gpu/Sophia/combs/st_wd/20180207_db_molprobity_biolassem/'
 
 an = analysis.Analyze(csv_dir)
 df = an.get_distant_vdms(seq_distance=10)
-print(len(df), 'dist')
 
 df = analysis.Analysis.remove_repeat_proteins(df)
 df = df[['pdb', 'chid_ifg', 'resname_ifg', 'resnum_ifg', \
-    'chid_vdm', 'resname_vdm', 'resnum_vdm']]
+    'chid_vdm', 'resname_vdm', 'resnum_vdm', 'segi_ifg', 'segi_vdm']]
 
 pkl.dump(df, open('/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/vdms_of_{}.pkl'.format(ifg_res),'wb'))

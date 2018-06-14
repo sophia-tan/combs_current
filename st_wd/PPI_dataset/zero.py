@@ -9,10 +9,8 @@ from Scoring import *
 from Functions import *
 from scipy import stats
 
-
 def text(label,x,y,ax):
     xytext=(5,0)
-    #xytext=(5,-4.5)
 
     ax.annotate(
         label,xy=(x,y),
@@ -26,7 +24,6 @@ for rmsd in [.4]:
     #for calc_method in ['a','b','c','d']:
         f, axarr = plt.subplots(3,2)
         all_ddgs = []
-        ddgs_of_no_intrxn = []
         all_rawscores = []
         all_sums = []
         all_means = []
@@ -60,7 +57,8 @@ for rmsd in [.4]:
                     predictions = filtered_matches[filtered_matches[
                         'mut string'].astype(str) == str(combo_mutation)]
                     # later, do the opposite to get it where it's 0
-                    predictions = predictions[predictions['num NN'] > 0]
+                    #predictions = predictions[predictions['num NN'] == 0]
+                    #predictions = predictions[predictions['num NN'] > 0]
                     num_nn = predictions['num NN'].apply(add_one)
                     num_vdms = predictions['num vdms'].apply(add_one)
                     direct_vdms = predictions[
@@ -73,9 +71,12 @@ for rmsd in [.4]:
                         'median num NNs w/o singles'].apply(add_one)
                         
                     if len(predictions)==0:
-                        ddgs_of_no_intrxn.append(ddg)
-
-                    elif len(predictions) > 0:
+                    #if len(predictions) > 0:
+                        #if sum(num_vdms.isin([1])) > 0: # if there are 0
+                        #    # interactions for one targetresi 
+                        #    colors.append('red')
+                        #else:
+                        #    colors.append('black')
                         all_ddgs.append(ddg)
                         if calc_method == 'a':
                             def calc(a,b): # for num 'a' and denom 'b'
@@ -103,12 +104,6 @@ for rmsd in [.4]:
                         labels.append(wt)
 
 
-                        #if len(predictions)==1:
-                        #    colors.append('b')
-                        #elif len(predictions)==2:
-                        #    colors.append('green')
-                        #else:
-                        #    colors.append('black')
         r,c=0, 0
         for pred, typ in zip([norm_by_num_vdms, norm_by_direct_vdms,
             norm_by_avg_num_NNs, norm_by_avg_num_NNs_nosing,
@@ -116,22 +111,22 @@ for rmsd in [.4]:
             ['num vdms', 'direct vdms', 'avg # NN', 'avg # NN no single',
             'med # NN', 'med # NN no single']):
             pearson_r = stats.pearsonr(all_ddgs, pred)
-            print(pearson_r, 'pearson')
+            #print(pearson_r, 'pearson')
             spearman_r = stats.spearmanr(all_ddgs, pred)
-            axarr[r,c].scatter(pred,all_ddgs,marker='o',
-                    lw=1,color='black',s=10)
-            no_intrxn = [0 for i in ddgs_of_no_intrxn]
-            #axarr[r,c].scatter(no_intrxn,ddgs_of_no_intrxn,marker='o',
-            #        lw=1,color='red',s=10)
+            num_nn = [0 for i in all_ddgs]
+            axarr[r,c].scatter(num_nn,all_ddgs,marker='o',
+                    lw=1)
+            #axarr[r,c].scatter(pred,all_ddgs,marker='o',
+            #        lw=1,color=colors,s=10)
             axarr[r,c].set_title(typ)
 
             #for label, x, y in zip(labels, pred, all_ddgs):
             #    text(label,x,y,axarr[r,c])
-    
+
             if c==1:
                 c=0
                 r+=1
             else:
                 c+=1
-        #plt.suptitle(calc_method)
+        plt.suptitle(calc_method)
         plt.show()

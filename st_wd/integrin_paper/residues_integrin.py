@@ -17,4 +17,4 @@ integrin_res['B603'] = 'T'
 integrin_res['B626'] = 'H'
 integrin_res['B658'] = 'K'
 integrin_res['B664'] = 'V'
-
+integrin_res['B534'] = 'E' # not at stalk but still activating
