@@ -1,5 +1,3 @@
-#for each targetresi's int_res: log(sum all counts / sum all interactions)
-
 import sys, os
 from scipy import stats
 sys.path.append('/home/gpu/Sophia/combs/src/')
@@ -7,132 +5,103 @@ from combs.apps import *
 from residues_integrin import *
 import pickle as pkl, numpy as np, pandas as pd
 
-freq = pkl.load(open('/home/gpu/Sophia/combs/st_wd/Lookups/AAi_freq/AAi_database_lookups.pkl','rb'))
-
 def rmsd_filter(method,cutoff,score):
     print('--------------------------')
     print('method, cutoff, score =',method, cutoff, score)
     
-    def triage(array,cutoff):
-        new_ls = []
-        for i in array:
-            ix,rmsd = i
-            if rmsd < cutoff:
-                new_ls.append(True)
-            else:
-                new_ls.append(False)
-        return new_ls
+    norm_by_num_vdms = []
+    norm_by_direct_vdms = []
+    norm_by_avg_num_NNs = []
+    norm_by_avg_num_NNs_nosing = []
+    norm_by_med_num_NNs = []
+    norm_by_med_num_NNs_nosing = []
 
-    def atomtriage(array,cutoff,num_atoms):
-        new_ls = []
-        for i in array:
-            ix,rmsd = i
-            newcut = num_atoms*cutoff
-            if newcut > .6:
-                newcut = .6
-            if newcut < .4:
-                print(newcut)
-            if rmsd < newcut:
-                new_ls.append(True)
-            else:
-                new_ls.append(False)
-        return new_ls
-
-    rawcounts_sum = []
-    numclus_sum = []
-    rawcounts_avg = []
-    numclus_avg = []
-    rawcount_norm_by_avgclus = []
-    rawcount_norm_by_total_clus = []
-    numclus_norm_by_avgclus = []
-    numclus_norm_by_total_clus = []
-    
     for targetres, resn in integrin_res.items():
     
         print('----------------')
         print('Target Res: ', targetres)
-        clus_size = [] # num obs
         rawcounts = [] # num obs
-        avgclus = [] # option to normalize by
+        num_vdms = [] # option to normalize by
         num_clustered = [] # option to normalize by
-        for pklf in os.listdir('./output_data/median_wo_singletons'):
-            if pklf.startswith(targetres[:4]) and pklf.endswith('rmsds_'+method+'.pkl'):
-                ifg = pklf.split('_')[1][3:]
-                vdm = pklf.split('_')[2][3:]
-                lookup = pkl.load(open('./output_data/median_wo_singletons/'+pklf,'rb')) # last element has atoms info
-                footnote_info = lookup[-1]
-                integrin_clus = footnote_info[-3]
-                num_atoms = footnote_info[0]
-                lookup = lookup[:-1]
-                #triaged = atomtriage(lookup,cutoff=cutoff,num_atoms=num_atoms)
-                triaged = triage(lookup,cutoff=cutoff)
-                rawcount = sum(triaged)
-                rawcounts.append(rawcount+1)
-                num_clustered.append(footnote_info[-2]+1)
-                clus_size.append(integrin_clus+1)
-                avgclus.append(footnote_info[-1]+1)
+        avgclus = [] # option to normalize by
+        avgclus_wo_sing = [] # option to normalize by
+        medclus = [] # option to normalize by
+        medclus_wo_sing = [] # option to normalize by
+        for pklf in os.listdir('./output_data/'):
+            if pklf.startswith(targetres[:4]) and pklf.endswith(
+                'matches_{}_{}.pkl'.format(method,cutoff)):
+                matches = pkl.load(open('./output_data/'+pklf,'rb')) 
+                [rmsd, resi, ifgresn, ifgresi, vdmresn, vdmresi,
+                        num_nn, norm_metrics] = matches
+                num_all_vdms, num_direct, [avgsize, avgsize_no_sing,
+                    medsize, medsize_no_sing] = norm_metrics
 
-                #print('Interacting residue: ', pklf.split('_')[2])
-                #print(rawcount,integrin_clus)
+                rawcounts.append(num_nn+2) # it's actually effectively +1, but I'm stupid 
+                # and returned num_nn - 1 in get_NN() when I shouldn't have
+                num_vdms.append(num_all_vdms + 1)
+                num_clustered.append(num_direct + 1) 
+                avgclus.append(avgsize + 1)
+                avgclus_wo_sing.append(avgsize_no_sing + 1)
+                medclus.append(medsize + 1)
+                medclus_wo_sing.append(medsize_no_sing + 1)
+
+                print('Interacting residue: ', pklf.split('_')[2])
+                print(num_nn, avgsize)
         if rawcounts == []:
             rawcounts = [1]
-            clus_size = [1]
-            '''there's no way to get the avg # of mems in a cluster if there are no identified interactions, so 
-            use the avg of avg cluster sizes'''
-            avgclus = [9.11999999]
-            num_clustered = [1]
+            num_vdms = [10000]
+            num_clustered = [10000]
+            for ls in [avgclus, avgclus_wo_sing, medclus, medclus_wo_sing]:
+                ls.append(10) 
 
-        clus_size = np.array(clus_size)
-        rawcounts = np.array(rawcounts)
-        avgclus = np.array(avgclus)
-        num_clustered = np.array(num_clustered)
-
-        rawcounts_sum.append(sum(rawcounts))
-        numclus_sum.append(sum(clus_size))
-        rawcounts_avg.append(np.mean(rawcounts))
-        numclus_avg.append(np.mean(clus_size))
-        
         ######################################################################
         # Diff methods of calculating score for list of observed counts 'a' 
         # and list of expected counts 'b'
         ######################################################################
+        def list_to_ndarray(a, b):
+            return [np.array(a), np.array(b)]
+        
         if score == 'a':
             def calc(a,b): 
+                a, b = list_to_ndarray(a, b)
                 return np.log10(sum(a/b))
             
         if score == 'b':
             def calc(a,b): 
+                a, b = list_to_ndarray(a, b)
                 return sum(np.log10(a/b))
             
         if score == 'c':
             def calc(a,b): 
+                a, b = list_to_ndarray(a, b)
                 return np.log10(sum(a)/sum(b))
             
         if score == 'd':
             def calc(a,b): 
+                a, b = list_to_ndarray(a, b)
                 return np.log10(np.mean(a/b))
 
         if score == 'e':
             def calc(a,b): 
+                a, b = list_to_ndarray(a, b)
                 return np.mean(np.log10(a/b))
 
         if score == 'f':
             def calc(a,b): 
+                a, b = list_to_ndarray(a, b)
                 return np.log10(np.mean(a)/np.mean(b))
 
-        print(rawcounts)
-        print(avgclus)
-        
-        rawcount_norm_by_avgclus.append(calc(rawcounts,avgclus))
-        rawcount_norm_by_total_clus.append(calc(rawcounts,num_clustered))
-        numclus_norm_by_avgclus.append(calc(clus_size,avgclus))
-        numclus_norm_by_total_clus.append(calc(clus_size,num_clustered))
+        #print(rawcounts)
+        #print(avgclus)
+        norm_by_num_vdms.append(calc(rawcounts, num_vdms))
+        norm_by_direct_vdms.append(calc(rawcounts, num_clustered))
+        norm_by_avg_num_NNs.append(calc(rawcounts, avgclus))
+        norm_by_avg_num_NNs_nosing.append(calc(rawcounts, avgclus_wo_sing))
+        norm_by_med_num_NNs.append(calc(rawcounts, medclus))
+        norm_by_med_num_NNs_nosing.append(calc(rawcounts, medclus_wo_sing))
 
-    #return [rawcounts_sum,numclus_sum,rawcounts_avg,numclus_avg]
-    return [rawcount_norm_by_avgclus, \
-        rawcount_norm_by_total_clus, numclus_norm_by_avgclus, numclus_norm_by_total_clus] 
-    #return [rawcounts_sum, numclus_sum, rawcounts_avg, numclus_avg, rawcount_norm_by_avgclus, \
-    #    rawcount_norm_by_total_clus, numclus_norm_by_avgclus, numclus_norm_by_total_clus] 
+    return [norm_by_num_vdms, norm_by_direct_vdms, norm_by_avg_num_NNs,
+        norm_by_avg_num_NNs_nosing, norm_by_med_num_NNs, norm_by_med_num_NNs_nosing]
     
 def get_correlation(megalist):
     AAs=['R671', 'I673', 'N753','F755','S758','V760', 'E785','H787','R900','L959', \
@@ -144,23 +113,20 @@ def get_correlation(megalist):
     #activation = np.array([0.54,0.23,0.37,0.4,0.64,0.83,0.47,0.17,0.31,0.05, \
     #    .12, .44, .399, .10, .20, .42])
 
-    #activation = np.array([0.54,0.23,0.37,0.4,0.64,0.83,0.47,0.17,0.31,0.05])
     ''' ughhhhhh taking out the funky serine'''
     activation = [activation[x] for x in range(len(activation)) if x != 4] # delete 
     for origcalc in megalist:
         ''' ughhhhhh taking out the funky serine'''
         calc = [origcalc[x] for x in range(len(origcalc)) if x != 4] # delete
-
         spearcorr = stats.spearmanr(activation,calc)
         pearscorr = stats.pearsonr(activation,calc)
-        #if pearscorr[0] > .7:
-        print(pearscorr)
+        print(spearcorr)
         print(origcalc,'calc')
-        #print(corr[0],corr[1])
 
-for method in ['planar_group']:
+for method in ['planar_group_no_bb']:
     for score in ['a']:
-    #for score in ['a','b','c','d']:
+    #for score in ['a','b','c','d','e','f']:
         for cut in [.5]:
+        #for cut in [.4,.5]:
             megalist = rmsd_filter(method,cut,score)
             get_correlation(megalist)

@@ -20,6 +20,9 @@ def get_interacting_atoms(parsed, resi, resn):
 
     assert len(list(set(target.getResnames()))) == 1
     assert constants.one_letter_code[target.getResnames()[0]] == resn
+    # third assertion makes sure that the target res doesn't have a segment id
+    # or anything funky
+    assert len(target) == len(constants.AA_sc_dict[constants.one_to_three[resn]]) + 4
 
     # find out if interaction is BB or SC
     other_chain = parsed.select('not (chain {})'.format(resi[0], resi[1:]))
@@ -89,10 +92,10 @@ def get_ifg_vdm(
         vdmatoms = ''
         if method == 'planar_group':
             possible_ifgatoms = [bb, constants.planar_atoms[ifgresn], cacbcg]
-            possible_vdmatoms = [bb, constants.planar_atoms[vdmresn], cacbcg]
         elif method == 'planar_group_no_bb':
             possible_ifgatoms = [constants.planar_atoms[ifgresn], cacbcg]
-            possible_vdmatoms = [constants.planar_atoms[vdmresn], cacbcg]
+        # ifg intrxn cannot be bb for analyzing ala mutants, but vdm can be
+        possible_vdmatoms = [bb, constants.planar_atoms[vdmresn], cacbcg]
         # Determine ifgatoms 
         for typ in possible_ifgatoms:
             for element in typ:
@@ -114,9 +117,19 @@ def get_ifg_vdm(
                         set(vdmcontactatoms))):
                     vdmatoms = element
 
-    elif method == 'sc':
+    # this restricts ifgatoms to just the sc (bc it will be mutated away in ala 
+    # scanning), but it can interact w/ bb or sc in vdm
+    elif method == 'sc_only_ifg': 
         ifgatoms = constants.AA_sc_dict[ifgresn]
-        vdmatoms = constants.AA_sc_dict[vdmresn]
+        
+        bb = ['C', 'O', 'CA', 'N']
+        vdmbb = len(set(bb).intersection(set(vdmcontactatoms))) 
+        if (len(set(vdmcontactatoms))-vdmbb) >= vdmbb:
+            vdmatoms = constants.AA_sc_dict[vdmresn]
+            if vdmresn == 'ALA':
+                vdmatoms = ['CA', 'CB']
+        else: 
+            vdmatoms = ['N', 'CA', 'C', 'O']
 
     elif method == 'whole_res':
         ifgatoms = constants.atoms_dict[ifgresn]
@@ -160,15 +173,18 @@ def filter_contact(ifgresn, vdmresn, ifgatoms, vdmatoms):
         open(
         '/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/vdms_of_{}.pkl'.
         format(threecode),'rb'))
+    print(len(vdmpdbinfo), threecode)
     csv = pd.merge(csv, vdmpdbinfo, left_index=True, right_index=True)
     csv = csv[csv['resname_vdm'] == vdmresn]
     num_all_vdms = len(csv) 
+    print(num_all_vdms, 'num all vdms')
     csv['in_contact'] = csv.apply(
         only_contacting,
         ifgatoms=ifgatoms,
         vdmatoms=vdmatoms,
         axis=1)
     csv = csv[csv['in_contact']]
+    print(len(csv), 'direct')
     return num_all_vdms, csv  # which is actually a pandas df
 
 def flip(atom_ls, resn):
@@ -206,19 +222,21 @@ def get_order_of_atoms(item, ifgresn, vdmresn, ifgls, vdmls):
 
 def score_interaction_and_dump(
         parsed, ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,
-        method, targetresi, cutoff, pdbix=None, pdbname=None):
+        method, targetresi, cutoff, pdbix=None, pdbname=None, output_pdb=False):
 
     cutoff = float(cutoff)
     ifgtype, vdmtype, ifginfo, vdminfo = get_ifg_vdm(
         parsed, ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms, method)
 
-    if ifgtype[1] == None:
-        print('Investigate why %ifgatoms% is empty!')
-    else:
-        ifgresn = constants.AAname_rev[ifgtype[0]]
-        vdmresn = constants.AAname_rev[vdmtype[0]]
-        ifgatoms = ifgtype[1]
-        vdmatoms = vdmtype[1]
+    ifgresn = constants.AAname_rev[ifgtype[0]]
+    vdmresn = constants.AAname_rev[vdmtype[0]]
+    ifgatoms = ifgtype[1]
+    vdmatoms = vdmtype[1]
+    
+    if ifgtype[1] == None or vdmtype[1] == None:
+        print('Investigate why %ifgatoms% or %vdmatoms% is empty!')
+    elif set(ifgatoms).issubset(set(constants.atoms_dict[ifgresn])) and set(
+        vdmatoms).issubset(set(constants.atoms_dict[vdmresn])):
 
         # Filter for only combed %vdmresn% vdms of ifgresn. And then keep only
         # the combed vdms whose %vdmatoms% are directly involved in the combed 
@@ -228,6 +246,7 @@ def score_interaction_and_dump(
         # structure (and therefore, %vdmatoms%) don't have interacting bb residues
         num_all_vdms, lookupdf = filter_contact(
             ifgresn, vdmresn, ifgatoms, vdmatoms)
+        print(len(lookupdf), 'len lookupdf')
         query = []
         for atom in ifgatoms:
             query.append(
@@ -253,87 +272,81 @@ def score_interaction_and_dump(
         vdmlists = flip(vdmatoms, vdmresn)
         rmsds = []
         num_atoms = len(query)
+        # keep only the coords for vdms in the filtered lookupdf
         coords_ls = [
-            item for item in lookupcoords if item[0] in lookupdf.index]
+            item for item in lookupcoords if (item[0] in lookupdf.index
+            and len(item)==3)]
         lookupatoms_to_clus = []
         counter = 0 # to keep count of how many pdbs are being output
         for item in coords_ls:
-            if len(item) == 3:
-                compare_rmsds = []
-                ifg_vdm_ind = []
-                for ifg_ind, ifgls in enumerate(ifglists):
-                    for vdm_ind, vdmls in enumerate(vdmlists):
-                        lookupatoms = get_order_of_atoms(
-                            item, ifgresn, vdmresn, ifgls, vdmls)
-                        moved, transf = pr.superpose(lookupatoms, query)
-                        temp_rmsd = pr.calcRMSD(moved, query)
-                        compare_rmsds.append(temp_rmsd)
-                        ifg_vdm_ind.append([moved, temp_rmsd])
-                # item[0] is df index
-                rmsds.append([item[0], min(compare_rmsds)])
-                # get index of which one had min rmsd
-                for which_ind, each in enumerate(ifg_vdm_ind):
-                    if each[1] == min(compare_rmsds):
-                        lookupatoms_to_clus.append(each[0])
-                        ######################################################################## 
-                        #                   output pdb if low rmsd 
-                        ######################################################################## 
-                        if each[1] < cutoff and counter < 30 and which_ind==0: 
-                            # this is to ensure rmsd is below cutoff when not flipped
-                            # bc don't want to take care of that in prody to output pdb
-                            row = lookupdf.loc[item[0]]
-                            try:
-                                db_dir = '/home/gpu/Sophia/STcombs/20171118/database/reduce/'
-                                par = pr.parsePDB(db_dir+row['pdb']+'H.pdb')
-                            except:
-                                db_dir = '/home/gpu/Sophia/combs/st_wd/20180207_db_molprobity_biolassem/'
-                                par = pr.parsePDB(db_dir+row['pdb']+'H.pdb')
+            compare_rmsds = []
+            ifg_vdm_ind = []
+            for ifg_ind, ifgls in enumerate(ifglists):
+                for vdm_ind, vdmls in enumerate(vdmlists):
+                    lookupatoms = get_order_of_atoms(
+                        item, ifgresn, vdmresn, ifgls, vdmls)
+                    moved, transf = pr.superpose(lookupatoms, query)
+                    temp_rmsd = pr.calcRMSD(moved, query)
+                    compare_rmsds.append(temp_rmsd)
+                    ifg_vdm_ind.append([moved, temp_rmsd])
+            # item[0] is df index
+            rmsds.append([item[0], min(compare_rmsds)])
+            # get index of which one had min rmsd
+            for which_ind, each in enumerate(ifg_vdm_ind):
+                if each[1] == min(compare_rmsds):
+                    lookupatoms_to_clus.append(each[0])
+                    ######################################################################## 
+                    #                   output pdb if low rmsd 
+                    ######################################################################## 
+                    if each[1] < cutoff and counter < 30 and which_ind==0 and output_pdb==True: 
+                        # this is to ensure rmsd is below cutoff when not flipped
+                        # bc don't want to take care of that in prody to output pdb
+                        row = lookupdf.loc[item[0]]
+                        db_dir = '/home/gpu/Sophia/combs/st_wd/20180207_db_molprobity_biolassem/'
+                        par = pr.parsePDB(db_dir+row['pdb']+'H.pdb')
     
-                            ifgchid, ifgresnum = row['chid_ifg'], row['resnum_ifg']
-                            vdmchid, vdmresnum = row['chid_vdm'], row['resnum_vdm']
-                            printout = copy.deepcopy(par)
-                            printout = printout.select(
-                                '(chain {} and resnum {}) or (chain {} and resnum {})'.format(
-                                ifgchid,ifgresnum,vdmchid,vdmresnum))
-                            printout.select('chain {} and resnum {}'.format(ifgchid,ifgresnum)).setChids('Y')
-                            printout.select('chain {} and resnum {}'.format(vdmchid,vdmresnum)).setChids('X')
-                            printout.select('all').setResnums(10)
-                            printout_interactamer = []
-                            integrin_interactamer = []
-                            try: # skip the ones that have segment ids. will prob need to update this 
-                            # for the newly combed stuff
-                                for atom in ifgatoms:
-                                    integrin_interactamer.append(parsed.select('chain {} and resnum {} and name {}'.format(ifginfo[0],ifginfo[1],atom)))
-                                    printout_interactamer.append(printout.select('chain Y and resnum 10 and name {}'.format(atom)))
-                                for atom in vdmatoms:
-                                    integrin_interactamer.append(parsed.select('chain {} and resnum {} and name {}'.format(vdminfo[0],vdminfo[1],atom)))
-                                    printout_interactamer.append(printout.select('chain X and resnum 10 and name {}'.format(atom)))
-                                integrin_interactamer_prody = []
-    
-                                integrin_interactamer = sum(integrin_interactamer[1:], integrin_interactamer[0])
-                                printout_interactamer = sum(printout_interactamer[1:], printout_interactamer[0])
-                                try:
-                                    assert len(integrin_interactamer) == len(printout_interactamer)
-    
-                                    interact_res = printout.select('(chain X and resnum 10) or (chain Y and resnum 10)')
-                                    interactamer_transf = pr.applyTransformation(transf, printout_interactamer)
-                                    outdir = './output_data/pdbfiles/'
-                                    
-                                    threecode = constants.AAname[ifgresn]
-    
-                                    pr.writePDB(outdir+'{}_{}_{}_{}{}_{}{}_{}_{}'.format(
-                                        pdbix, pdbname, targetresi,ifginfo[1],
-                                        ifgresn,vdminfo[1],vdmresn,cutoff,
-                                        row.name), interactamer_transf)
-                                    counter += 1
-                                except:
-                                    pass
-                            except:
-                                traceback.print_exc()
-                                pass
+                        ifgchid, ifgresnum = row['chid_ifg'], row['resnum_ifg']
+                        vdmchid, vdmresnum = row['chid_vdm'], row['resnum_vdm']
+                        ifgseg, vdmseg = row['segi_ifg'],row['segi_vdm']
 
-            else:
-                rmsds.append([int(item[0]), 100000])
+                        printout = copy.deepcopy(par)
+                        printout = printout.select(
+                            '(chain {} and segment {} and resnum {}) or (chain {} and segment {} and resnum {})'.format(
+                            ifgchid,ifgseg,ifgresnum,vdmchid,vdmseg,vdmresnum))
+                        printout.select('chain {} and resnum {}'.format(ifgchid,ifgresnum)).setChids('Y')
+                        printout.select('chain {} and resnum {}'.format(vdmchid,vdmresnum)).setChids('X')
+                        printout.select('all').setResnums(10)
+                        printout_interactamer = []
+                        integrin_interactamer = []
+                        for atom in ifgatoms:
+                            integrin_interactamer.append(parsed.select('chain {} and resnum {} and name {}'.format(ifginfo[0],ifginfo[1],atom)))
+                            printout_interactamer.append(printout.select('chain Y and resnum 10 and name {}'.format(atom)))
+                        for atom in vdmatoms:
+                            integrin_interactamer.append(parsed.select('chain {} and resnum {} and name {}'.format(vdminfo[0],vdminfo[1],atom)))
+                            printout_interactamer.append(printout.select('chain X and resnum 10 and name {}'.format(atom)))
+                        integrin_interactamer_prody = []
+    
+                        integrin_interactamer = sum(integrin_interactamer[1:], integrin_interactamer[0])
+                        printout_interactamer = sum(printout_interactamer[1:], printout_interactamer[0])
+                        try:
+                            assert len(integrin_interactamer) == len(printout_interactamer)
+                            interactamer_transf = pr.applyTransformation(transf, printout_interactamer)
+                            outdir = './output_data/pdbfiles/'
+                            threecode = constants.AAname[ifgresn]
+                            if pdbix != None and pdbname != None:
+                                pr.writePDB(outdir+'{}_{}_{}_{}{}_{}{}_{}_{}'.format(
+                                    pdbix, pdbname, targetresi,ifginfo[1],
+                                    ifgresn,vdminfo[1],vdmresn,cutoff,
+                                    row.name), interactamer_transf)
+                            else: 
+                                pr.writePDB(outdir+'{}_{}{}_{}{}_{}_{}'.format(
+                                    targetresi,ifginfo[1],
+                                    ifgresn,vdminfo[1],vdmresn,cutoff,
+                                    row.name), interactamer_transf)
+                            counter += 1
+                        except:
+                            traceback.print_exc()
+                            pass
 
         # count how many NNs the query intrxn has
         num_nn, norm_metrics = get_NN(lookupatoms_to_clus, 
@@ -349,7 +362,7 @@ def get_NN(lookupatoms_to_clus, num_atoms, rmsds, query, cutoff, num_all_vdms):
         metric='euclidean',
         radius=euclid_dist)
     nnfit = nbrs.fit(flat)
-    query = query.reshape(-1,)
+    query = query.reshape(1,-1)
     num_nn = len(nnfit.radius_neighbors(query, return_distance=False)[0])
 
     # See if num_nn is close to the # of geometric matches within 

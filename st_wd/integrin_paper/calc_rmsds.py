@@ -34,7 +34,18 @@ for resi, resn in integrin_res.items():
             
             # ======= treat targetres as ifg ==========
             # Reminder: int_res is resname
-            for rmsd in [.3,.4,.5]:
+            for rmsd in [.5]:
+            #for rmsd in [.3,.4,.5]:
                 matches = score_interaction_and_dump(parsed,
                     constants.three_letter_code[resn], int_res, target_res_atoms, 
-                    int_res_atoms,method=method,targetresi=resi, cutoff=rmsd)
+                    int_res_atoms,method=method,targetresi=resi, cutoff=rmsd, output_pdb=True)
+                        
+                if matches != None:
+                    ifgchid, ifgresi, ifgresn, vdmchid, vdmresi, vdmresn, ifgatoms, \
+                        vdmatoms, num_nn, norm_metrics = matches
+
+                    dump_list = [rmsd, resi, ifgresn, ifgresi, vdmresn, vdmresi,
+                        num_nn, norm_metrics]
+
+                    pkl.dump(dump_list, open('./output_data/{}_{}{}_{}{}_matches_{}_{}.pkl'.format(resi, 
+                        ifgresi, ifgresn, vdmresi, vdmresn, method, rmsd), 'wb'))

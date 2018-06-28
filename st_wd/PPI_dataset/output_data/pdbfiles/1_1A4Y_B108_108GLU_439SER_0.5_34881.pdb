@@ -1,8 +1,0 @@
-REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...and resnum 15))') + (Selection '(chain Y and re...and resnum 15))')) + (Selection '(chain Y and re...and resnum 15))')) + (Selection '(chain Y and re...and resnum 15))')) + (Selection '(chain X and re...and resnum 15))')) + (Selection '(chain X and re...and resnum 15))')) + (Selection '(chain X and re...and resnum 15))')
-ATOM      1  CG  GLU Y  10     -12.213 -10.211  45.886  1.00 28.11           C
-ATOM      2  CD  GLU Y  10     -12.168  -9.165  44.775  1.00 30.82           C
-ATOM      3  OE2 GLU Y  10     -12.415  -7.974  45.067  1.00 31.81           O
-ATOM      4  OE1 GLU Y  10     -11.872  -9.528  43.613  1.00 30.67           O
-ATOM      5  N   SER X  10     -10.211  -3.593  45.395  1.00 49.28           N
-ATOM      6  CA  SER X  10     -11.435  -4.363  45.546  1.00 46.83           C
-ATOM      7  C   SER X  10     -12.237  -4.159  44.273  1.00 45.64           C

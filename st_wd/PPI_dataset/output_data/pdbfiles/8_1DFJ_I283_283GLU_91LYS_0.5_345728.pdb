@@ -1,8 +1,0 @@
-REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...and resnum 50))') + (Selection '(chain Y and re...and resnum 50))')) + (Selection '(chain Y and re...and resnum 50))')) + (Selection '(chain Y and re...and resnum 50))')) + (Selection '(chain X and re...and resnum 50))')) + (Selection '(chain X and re...and resnum 50))')) + (Selection '(chain X and re...and resnum 50))')
-ATOM      1  CG AGLU Y  10      19.095  51.366  12.669  0.51 24.54         A C
-ATOM      2  CD AGLU Y  10      20.376  50.625  12.427  0.51 25.66         A C
-ATOM      3  OE2AGLU Y  10      21.382  51.288  12.116  0.51 27.22         A O
-ATOM      4  OE1AGLU Y  10      20.366  49.376  12.527  0.51 24.56         A O
-ATOM      5  CD  LYS X  10      18.611  46.359  12.083  1.00 27.96         A C
-ATOM      6  CE  LYS X  10      19.256  46.764  10.766  1.00 31.84         A C
-ATOM      7  NZ  LYS X  10      20.608  47.358  10.939  1.00 34.92         A N

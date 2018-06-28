@@ -4,6 +4,7 @@ from combs import analysis
 import pandas as pd, prody as pr
 import pickle as pkl
 from sys import argv
+from combs.apps import *
 
 script, ifg_res = argv
 
@@ -12,6 +13,7 @@ db_pdbs = '/home/gpu/Sophia/combs/st_wd/20180207_db_molprobity_biolassem/'
 
 an = analysis.Analyze(csv_dir)
 df = an.get_distant_vdms(seq_distance=10)
+df = df[df['resname_vdm'] != 'MSE'] # remove MSE, etc.
 
 df = analysis.Analysis.remove_repeat_proteins(df)
 df = df[['pdb', 'chid_ifg', 'resname_ifg', 'resnum_ifg', \

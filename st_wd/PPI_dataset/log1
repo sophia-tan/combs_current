@@ -1,0 +1,33 @@
+#####################################
+9 1DQJ
+--------------------
+Target Res C21 ['R', 'A', [['C', 'R21A'], ['A', 'Y96A']]]
+Interacting Res [93, 'TRP']
+
+Traceback (most recent call last):
+  File "calc_rmsds.py", line 52, in <module>
+    pdbix=pdb_index, pdbname=pdbname)
+  File "/home/gpu/Sophia/combs/st_wd/PPI_dataset/Scoring.py", line 347, in score_interaction_and_dump
+    num_atoms, rmsds, query, cutoff, num_all_vdms)
+  File "/home/gpu/Sophia/combs/st_wd/PPI_dataset/Scoring.py", line 358, in get_NN
+    nnfit = nbrs.fit(flat)
+  File "/home/gpu/bin/miniconda3/lib/python3.6/site-packages/sklearn/neighbors/base.py", line 799, in fit
+    return self._fit(X)
+  File "/home/gpu/bin/miniconda3/lib/python3.6/site-packages/sklearn/neighbors/base.py", line 203, in _fit
+    X = check_array(X, accept_sparse='csr')
+  File "/home/gpu/bin/miniconda3/lib/python3.6/site-packages/sklearn/utils/validation.py", line 424, in check_array
+    context))
+ValueError: Found array with 0 feature(s) (shape=(1, 0)) while a minimum of 1 is required.
+#####################################
+13 1EMV
+--------------------
+Target Res A38 ['T', 'A', [['A', 'T38A']]]
+Interacting Res [179, 'LYS']
+
+Traceback (most recent call last):
+  File "calc_rmsds.py", line 52, in <module>
+    pdbix=pdb_index, pdbname=pdbname)
+  File "/home/gpu/Sophia/combs/st_wd/PPI_dataset/Scoring.py", line 245, in score_interaction_and_dump
+    atom)).getCoords()[0])
+AttributeError: 'NoneType' object has no attribute 'getCoords'
+#####################################

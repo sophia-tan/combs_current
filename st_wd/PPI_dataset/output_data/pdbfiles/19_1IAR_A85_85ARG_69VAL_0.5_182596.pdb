@@ -1,7 +1,0 @@
-REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...nd resnum 253))') + (Selection '(chain Y and re...nd resnum 253))')) + (Selection '(chain Y and re...nd resnum 253))')) + (Selection '(chain X and re...nd resnum 253))')) + (Selection '(chain X and re...nd resnum 253))')) + (Selection '(chain X and re...nd resnum 253))')
-ATOM      1  CA  ARG Y  10      16.337  13.413 -14.545  1.00  9.51           C
-ATOM      2  CB  ARG Y  10      16.518  14.809 -13.966  1.00 10.95           C
-ATOM      3  CG  ARG Y  10      17.615  15.637 -14.641  1.00  9.79           C
-ATOM      4  CG1AVAL X  10      19.268  13.724 -17.599  0.44  8.94           C
-ATOM      5  CB AVAL X  10      19.789  12.299 -17.461  0.44 11.09           C
-ATOM      6  CG2AVAL X  10      19.039  11.353 -18.371  0.44 16.31           C
