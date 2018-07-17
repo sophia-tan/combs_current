@@ -10,6 +10,7 @@ import pandas as pd
 from itertools import *
 from cluster_for_sophia import *
 sys.path.append('/home/gpu/Sophia/combs/src/')
+from clusterScoring import *
 
 np.warnings.filterwarnings('ignore')
 
@@ -164,7 +165,7 @@ def filter_contact(ifgresn, vdmresn, ifgatoms, vdmatoms):
             '/home/gpu/Sophia/STcombs/20171118/{}/csv/{}_ifg_contact_vdm.csv'.format(threecode, threecode))
     except BaseException:
         csv = pd.read_csv(
-            '/home/gpu/Sophia/combs/st_wd/20180207db_combed_csvs/{}/{}_ifg_contact_vdm.csv'.format(
+            '/home/gpu/Sophia/combs/st_wd/20180626_combed_csvs/{}/{}_ifg_contact_vdm.csv'.format(
                 threecode, threecode))
     vdmpdbinfo = pkl.load(
         open(

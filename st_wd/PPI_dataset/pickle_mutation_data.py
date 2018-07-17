@@ -1,7 +1,7 @@
 # THIS SCRIPT GENERATES RESDICTS
 
 import pandas as pd, pickle as pkl
-from Functions import *
+from PPI_Functions import *
 
 '''load dataset'''
 zemu = pd.read_csv('kortemme_flexddg_dataset.csv')

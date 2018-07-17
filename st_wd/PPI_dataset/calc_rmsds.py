@@ -4,7 +4,8 @@ from combs.apps import *
 import prody as pr
 import numpy as np, pickle as pkl, pandas as pd
 from itertools import *
-from Scoring import *
+sys.path.append('/home/gpu/Sophia/combs/st_wd/Scoring_Function')
+from ScoringInteractions import *
 from PPI_Functions import *
 
 script, pdb_index, method = sys.argv
@@ -15,23 +16,24 @@ script, pdb_index, method = sys.argv
      interactions bc we're looking at mutations to ala, and bb interactions 
      don't change '''
 
-try:
-    pkl.load(open('./output_data/pdb_ix_{}_matches.pkl'.
-        format(pdb_index),'rb'))
-except:
-    mutation_data = pkl.load(open('mutation_data.pkl','rb'))
-    pdb_resdict = mutation_data[0][int(pdb_index)]
-    pdbname, pdb_resdict = pdb_resdict[0], pdb_resdict[1]
-                    
-    list_for_df = [] # will ultimately dump this df in output dir
-    parsed = pr.parsePDB(pdbname)
-    parsed = parsed.select('not water')
-    print('#####################################')
-    print(pdb_index, pdbname)
-    # For each target res, find the residues w/in 3.5 and 4.8A
-    for resi, resn_list in pdb_resdict.items():
-        interacting_atoms = get_interacting_atoms(parsed, resi, resn_list[0])
-        # list of list where inner list is [targetatomindex, int_resatomindex]
+#try:
+#    pkl.load(open('./output_data/pdb_ix_{}_matches.pkl'.
+#        format(pdb_index),'rb'))
+#except:
+mutation_data = pkl.load(open('mutation_data.pkl','rb'))
+pdb_resdict = mutation_data[0][int(pdb_index)]
+pdbname, pdb_resdict = pdb_resdict[0], pdb_resdict[1]
+                
+list_for_df = [] # will ultimately dump this df in output dir
+parsed = pr.parsePDB(pdbname)
+parsed = parsed.select('not water')
+print('#####################################')
+print(pdb_index, pdbname)
+# For each target res, find the residues w/in 3.5 and 4.8A
+for resi, resn_list in pdb_resdict.items():
+    interacting_atoms = get_interacting_atoms(parsed, resi, resn_list[0])
+    # list of list where inner list is [targetatomindex, int_resatomindex]
+    if interacting_atoms != None:
         interacting_resindices = set(list([parsed.select('index %s'%
             x[1]).getResindices()[0] for x in interacting_atoms]))
         print('--------------------')
@@ -83,6 +85,6 @@ except:
                     'num directly interacting vdms', 'avg num NNs', 
                     'avg num NNs w/o singles', 'median num NNs', 
                     'median num NNs w/o singles', 'method']))
-    outputdf = pd.DataFrame(list_for_df)
-    pkl.dump(outputdf,open('./output_data/pdb_ix_{}_matches.pkl'.
-        format(pdb_index),'wb'))
+outputdf = pd.DataFrame(list_for_df)
+pkl.dump(outputdf,open('./output_data/pdb_ix_{}_matches.pkl'.
+    format(pdb_index),'wb'))

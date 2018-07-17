@@ -13,7 +13,6 @@ count = 0
 for pdb in opm:
     if pdb in combs_db:
         count += 1
-        print(pdb)
 print(count)
 
         

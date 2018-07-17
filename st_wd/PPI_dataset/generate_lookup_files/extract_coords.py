@@ -27,7 +27,7 @@ except:
                 vdm = []
                 ifgname,vdmname = row['resname_ifg'],row['resname_vdm']
                 if vdmname in constants.atoms_dict.keys(): # ignore MSE, etc.
-                    db_dir = '/home/gpu/Sophia/combs/st_wd/20180207_db_molprobity_biolassem/'
+                    db_dir = '/home/gpu/Sophia/combs/st_wd/20180626_db_molprobity_biolassem/'
                     par = pr.parsePDB(db_dir + row['pdb'] + 'H.pdb')
                     ifgchid,ifgresnum = row['chid_ifg'],row['resnum_ifg']
                     vdmchid,vdmresnum = row['chid_vdm'],row['resnum_vdm']

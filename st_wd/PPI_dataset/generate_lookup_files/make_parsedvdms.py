@@ -8,7 +8,7 @@ from combs.apps import *
 
 script, ifg_res = argv
 
-csv_dir = '/home/gpu/Sophia/combs/st_wd/20180207_combed_csvs/%s/'%ifg_res
+csv_dir = '/home/gpu/Sophia/combs/st_wd/20180626_combed_csvs/%s/'%ifg_res
 db_pdbs = '/home/gpu/Sophia/combs/st_wd/20180207_db_molprobity_biolassem/'
 
 an = analysis.Analyze(csv_dir)

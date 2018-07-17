@@ -4,10 +4,33 @@ sys.path.append('/home/gpu/Sophia/combs/src/')
 from combs.apps import *
 from residues_integrin import *
 import pickle as pkl, numpy as np, pandas as pd
+import matplotlib.pyplot as plt
 
-def rmsd_filter(method,cutoff,score):
+### PLOTTING DETAILS ###
+def best_fit_slope(xs,ys):
+    xs,ys=np.array(xs),np.array(ys)
+    m = (((np.mean(xs)*np.mean(ys)) - np.mean(xs*ys)) / \
+             ((np.mean(xs)*np.mean(xs)) - np.mean(xs*xs)))
+    b = np.mean(ys) - m*np.mean(xs)
+    return m,b
+
+f, axarr = plt.subplots(1)
+ind = 0
+    
+AAs=['R671', 'I673', 'N753','F755','S758','V760', 'E785','H787','R900','L959', \
+     'D552', 'Y594', 'T603','H626','K658', 'V664', 'E534']
+activation = np.array([0.54,0.23,0.37,0.4,0.64,0.83,0.47,0.17,0.31,0.05, \
+    .12, .44, .399, .10, .20, .42, 0.76])
+sortedactivation = sorted(activation)
+new_order = [np.where(activation==i)[0][0] for ix,i in enumerate(sortedactivation)]
+AAs = [AAs[ix] for ix in new_order]
+activation = [activation[ix] for ix in new_order]
+
+### ANALYZING DETAILS ###
+def rmsd_filter(method,cutoff,score,nonmembrane,buried):
     print('--------------------------')
-    print('method, cutoff, score =',method, cutoff, score)
+    print('method, nonmembrane, buried, cutoff, score =',
+        method, nonmembrane, buried, cutoff, score)
     
     norm_by_num_vdms = []
     norm_by_direct_vdms = []
@@ -18,8 +41,8 @@ def rmsd_filter(method,cutoff,score):
 
     for targetres, resn in integrin_res.items():
     
-        print('----------------')
-        print('Target Res: ', targetres)
+        #print('----------------')
+        #print('Target Res: ', targetres)
         rawcounts = [] # num obs
         num_vdms = [] # option to normalize by
         num_clustered = [] # option to normalize by
@@ -29,15 +52,15 @@ def rmsd_filter(method,cutoff,score):
         medclus_wo_sing = [] # option to normalize by
         for pklf in os.listdir('./output_data/'):
             if pklf.startswith(targetres[:4]) and pklf.endswith(
-                'matches_{}_{}.pkl'.format(method,cutoff)):
+                'matches_{}_nonmembrane_{}_buried_{}_{}.pkl'.format(method,
+                nonmembrane, buried, cutoff )):
                 matches = pkl.load(open('./output_data/'+pklf,'rb')) 
                 [rmsd, resi, ifgresn, ifgresi, vdmresn, vdmresi,
                         num_nn, norm_metrics] = matches
                 num_all_vdms, num_direct, [avgsize, avgsize_no_sing,
                     medsize, medsize_no_sing] = norm_metrics
 
-                rawcounts.append(num_nn+2) # it's actually effectively +1, but I'm stupid 
-                # and returned num_nn - 1 in get_NN() when I shouldn't have
+                rawcounts.append(num_nn+1)
                 num_vdms.append(num_all_vdms + 1)
                 num_clustered.append(num_direct + 1) 
                 avgclus.append(avgsize + 1)
@@ -45,8 +68,8 @@ def rmsd_filter(method,cutoff,score):
                 medclus.append(medsize + 1)
                 medclus_wo_sing.append(medsize_no_sing + 1)
 
-                print('Interacting residue: ', pklf.split('_')[2])
-                print(num_nn, avgsize)
+                #print('Interacting residue: ', pklf.split('_')[2])
+                #print(num_nn, num_all_vdms, num_direct)
         if rawcounts == []:
             rawcounts = [1]
             num_vdms = [10000]
@@ -61,38 +84,56 @@ def rmsd_filter(method,cutoff,score):
         def list_to_ndarray(a, b):
             return [np.array(a), np.array(b)]
         
-        if score == 'a':
-            def calc(a,b): 
-                a, b = list_to_ndarray(a, b)
+        def calc(a,b): 
+            a, b = list_to_ndarray(a, b)
+            # all variations of just rawcounts, no normalization
+            if score == 'a':
+                return sum(a)
+            if score == 'b':
+                return sum(np.log10(a))
+            if score == 'c':
+                return np.log10(sum(a))
+
+            # all variations of arrays 'a' and 'b' treated equally
+            if score == 'd':
+                return sum(a)/sum(b)
+            if score == 'e':
+                return sum(a/b)
+            if score == 'f':
                 return np.log10(sum(a/b))
-            
-        if score == 'b':
-            def calc(a,b): 
-                a, b = list_to_ndarray(a, b)
-                return sum(np.log10(a/b))
-            
-        if score == 'c':
-            def calc(a,b): 
-                a, b = list_to_ndarray(a, b)
+            if score == 'g':
                 return np.log10(sum(a)/sum(b))
+            if score == 'h':
+                return sum(np.log10(a/b))
+            if score == 'i':
+                return sum(np.log10(a)/np.log10(b))
+            if score == 'j':
+                return np.log10(sum(a))/np.log10(sum(b))
+            if score == 'k':
+                return sum(np.log10(a))/sum(np.log10(b))
+
+            # all variations with log of only array 'a' and not 'b'
+            if score == 'l':
+                return sum(np.log10(a)/b)
+            if score == 'm':
+                return np.log10(sum(a))/sum(b)
+            if score == 'n':
+                return sum(np.log10(a))/sum(b)
             
-        if score == 'd':
-            def calc(a,b): 
-                a, b = list_to_ndarray(a, b)
-                return np.log10(np.mean(a/b))
-
-        if score == 'e':
-            def calc(a,b): 
-                a, b = list_to_ndarray(a, b)
-                return np.mean(np.log10(a/b))
-
-        if score == 'f':
-            def calc(a,b): 
-                a, b = list_to_ndarray(a, b)
-                return np.log10(np.mean(a)/np.mean(b))
+            # all variations with log of only array 'b' and not 'a'
+            if score == 'o':
+                return sum(a/np.log10(b))
+            if score == 'p':
+                return sum(a)/np.log10(sum(b))
+            if score == 'q':
+                return sum(a)/sum(np.log10(b))
 
         #print(rawcounts)
         #print(avgclus)
+        #print('rawcounts')
+        #print(rawcounts)
+        #print('num vdms')
+        #print(num_vdms)
         norm_by_num_vdms.append(calc(rawcounts, num_vdms))
         norm_by_direct_vdms.append(calc(rawcounts, num_clustered))
         norm_by_avg_num_NNs.append(calc(rawcounts, avgclus))
@@ -100,8 +141,9 @@ def rmsd_filter(method,cutoff,score):
         norm_by_med_num_NNs.append(calc(rawcounts, medclus))
         norm_by_med_num_NNs_nosing.append(calc(rawcounts, medclus_wo_sing))
 
-    return [norm_by_num_vdms, norm_by_direct_vdms, norm_by_avg_num_NNs,
-        norm_by_avg_num_NNs_nosing, norm_by_med_num_NNs, norm_by_med_num_NNs_nosing]
+    #return [norm_by_num_vdms, norm_by_direct_vdms, norm_by_avg_num_NNs,
+    #    norm_by_avg_num_NNs_nosing, norm_by_med_num_NNs, norm_by_med_num_NNs_nosing]
+    return [norm_by_num_vdms]
     
 def get_correlation(megalist):
     AAs=['R671', 'I673', 'N753','F755','S758','V760', 'E785','H787','R900','L959', \
@@ -115,18 +157,64 @@ def get_correlation(megalist):
 
     ''' ughhhhhh taking out the funky serine'''
     activation = [activation[x] for x in range(len(activation)) if x != 4] # delete 
+    mega_calc = []
     for origcalc in megalist:
         ''' ughhhhhh taking out the funky serine'''
         calc = [origcalc[x] for x in range(len(origcalc)) if x != 4] # delete
         spearcorr = stats.spearmanr(activation,calc)
         pearscorr = stats.pearsonr(activation,calc)
-        print(spearcorr)
-        print(origcalc,'calc')
+        mega_calc.append([pearscorr, origcalc])
+    return mega_calc
 
+#for method in ['sc_only_ifg']:
 for method in ['planar_group_no_bb']:
-    for score in ['a']:
-    #for score in ['a','b','c','d','e','f']:
-        for cut in [.5]:
-        #for cut in [.4,.5]:
-            megalist = rmsd_filter(method,cut,score)
-            get_correlation(megalist)
+    for nonmembrane in [False]:
+        for buried in [False]:
+            for score in ['j']:
+            #for score in ['e','f','g','h','i','j','k','l','m','n','o','p','q']:
+                for cut in [.3]:
+                #for cut in [.3,.4,.5,.6,.7,.8,.9,1]:
+                    megalist = rmsd_filter(method,cut,score,nonmembrane,buried)
+                    
+                    mega_calc = get_correlation(megalist)
+                    for element in mega_calc:
+                        pearscorr, calc = element
+                        if pearscorr[0] > .7:
+                            # plotting details
+
+                            calc = [calc[ix] for ix in new_order]
+                            
+                            #sns.despine(right=True)
+                            
+                            print(pearscorr[0])
+                            axarr[ind].scatter(calc,activation,marker='o',edgecolors='gray',facecolors='c',
+                                       lw=1)
+                            axarr[ind].scatter(calc[14],activation[14],marker='o',edgecolors='black',facecolors='r',
+                                lw=1) # overwriting with diff color
+                    
+                    
+                            m,b=best_fit_slope(calc,activation)
+                            regression_x = [x for x in calc]
+                            regression_line = [(m*x)+b for x in calc]
+                    
+                            axarr[ind].scatter(regression_x,regression_line)
+                        
+                            def text(label,x,y):
+                                xytext=(5,-4.5)
+                                if label=='H626':
+                                    xytext=(5,-9)
+                                axarr[ind].annotate(
+                                    label,xy=(x,y),
+                                    xytext=xytext,textcoords='offset points',size=12)
+                            
+                            #for label, x, y in zip(AAs, calc,activation):
+                            #    text(label,x,y)
+                            
+                            ind += 1
+plt.show()
+                    #    
+                    #    plt.title('normalized by # directly interacting vdms, r^2=0.18')
+                    #    plt.xlabel('interaction score')
+                    #    plt.ylabel('experimental activation index')
+                    #    plt.tight_layout()
+                    #    plt.show()

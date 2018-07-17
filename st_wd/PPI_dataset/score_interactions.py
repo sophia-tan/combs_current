@@ -5,9 +5,10 @@ from combs.apps import *
 import prody as pr
 import numpy as np, pickle as pkl, pandas as pd
 from itertools import *
-from Scoring import *
-from Functions import *
 from scipy import stats
+sys.path.append('/home/gpu/Sophia/combs/st_wd/Scoring_Function')
+from ScoringInteractions import *
+from PPI_Functions import *
 
 
 def text(label,x,y,ax):
@@ -59,6 +60,7 @@ for rmsd in [.4]:
                     combo_mutation = row['Mutation']
                     predictions = filtered_matches[filtered_matches[
                         'mut string'].astype(str) == str(combo_mutation)]
+                    
                     # later, do the opposite to get it where it's 0
                     predictions = predictions[predictions['num NN'] > 0]
                     num_nn = predictions['num NN'].apply(add_one)
@@ -103,12 +105,12 @@ for rmsd in [.4]:
                         labels.append(wt)
 
 
-                        #if len(predictions)==1:
-                        #    colors.append('b')
-                        #elif len(predictions)==2:
-                        #    colors.append('green')
-                        #else:
-                        #    colors.append('black')
+                        if len(predictions)==1:
+                            colors.append('b')
+                        elif len(predictions)==2:
+                            colors.append('green')
+                        else:
+                            colors.append('black')
         r,c=0, 0
         for pred, typ in zip([norm_by_num_vdms, norm_by_direct_vdms,
             norm_by_avg_num_NNs, norm_by_avg_num_NNs_nosing,
@@ -119,10 +121,10 @@ for rmsd in [.4]:
             print(pearson_r, 'pearson')
             spearman_r = stats.spearmanr(all_ddgs, pred)
             axarr[r,c].scatter(pred,all_ddgs,marker='o',
-                    lw=1,color='black',s=10)
+                    lw=1,color=colors,s=10)
             no_intrxn = [0 for i in ddgs_of_no_intrxn]
-            #axarr[r,c].scatter(no_intrxn,ddgs_of_no_intrxn,marker='o',
-            #        lw=1,color='red',s=10)
+            axarr[r,c].scatter(no_intrxn,ddgs_of_no_intrxn,marker='o',
+                    lw=1,color='red',s=10)
             axarr[r,c].set_title(typ)
 
             #for label, x, y in zip(labels, pred, all_ddgs):

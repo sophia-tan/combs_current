@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from sys import argv
 sns.set_style("white")
+sns.despine(right=True)
+plt.frameon=False
 
 f,(ax1,ax2) = plt.subplots(1,2,sharey=True)
 
@@ -22,15 +24,13 @@ for method,ax in zip(['pdb'],[ax1,ax2]):
     activation = np.array([0.54,0.23,0.37,0.4,0.64,0.83,0.47,0.17,0.31,0.05, \
         .12, .44, .399, .10, .20, .42, 0.76])
     
-    
-    
     sortedactivation = sorted(activation)
-    
     
     if method == 'pdb':
         new_order = [np.where(activation==i)[0][0] for ix,i in enumerate(sortedactivation)]
+        
+        calc = [-0.73565135406907078, -1.1099970011880969, -0.9509623979422589, -0.55855400076969097, -4.0, -0.63871227742336523, -0.6497112232193486, -4.0, -1.4089136426244342, -4.0, -4.0, -1.0603182723308935, -0.42038874219255273, -4.0, -1.3516544087136497, -0.84476731695075324, -1.2119450220720454]
 
-        calc = [-2.4329709040267118, -3.4090147995618105, -2.6006553576794031, -2.8004132052090203, -4.0, -3.381630716842734, -2.7327972824759992, -4.0, -2.9473636913326939, -4.0, -4.0, -3.0250766057272291, -2.5602510798264042, -4.0, -3.031105362355941, -3.5854607295085006, -3.6240241246478613]
         xaxis = 'interaction score'
         #yerr = [.03,.03,.03,.13,.08,.12,.04,.02,.06,.001,0,0,0,0,0,0] 
         #yerr = [yerr[ix] for ix in new_order]
@@ -43,6 +43,8 @@ for method,ax in zip(['pdb'],[ax1,ax2]):
         0, .6, 2.89, 0, .63, .34]
         col = 'lavender'
     
+    print(len(sortedactivation),len(calc))
+
     calc = [calc[ix] for ix in new_order]
     AAs = [AAs[ix] for ix in new_order]
     activation = [activation[ix] for ix in new_order]
@@ -81,7 +83,6 @@ for method,ax in zip(['pdb'],[ax1,ax2]):
             label,xy=(x,y),
             xytext=xytext,textcoords='offset points',size=12)
     
-    sns.despine(right=True)
 
     if method=='pdb':
         #plt.errorbar(calc,activation,yerr=yerr,fmt='o')

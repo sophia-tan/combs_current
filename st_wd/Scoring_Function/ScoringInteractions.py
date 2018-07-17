@@ -10,9 +10,10 @@ import pandas as pd
 from itertools import *
 sys.path.append('/home/gpu/Sophia/combs/src/')
 
-#np.warnings.filterwarnings('ignore')
+np.warnings.filterwarnings('ignore')
 
 def get_interacting_atoms(parsed, resi, resn):
+    parsed = parsed.select('not element H D and not name OXT')
     if resi[1:].isdigit(): # removes all insertion codes
         target = parsed.select('chain %s and resnum %s_' % (resi[0], resi[1:]))
     else: # has insertion code
@@ -20,32 +21,33 @@ def get_interacting_atoms(parsed, resi, resn):
 
     assert len(list(set(target.getResnames()))) == 1
     assert constants.one_letter_code[target.getResnames()[0]] == resn
-    # third assertion makes sure that the target res doesn't have a segment id
-    # or anything funky
-    assert len(target) == len(constants.AA_sc_dict[constants.one_to_three[resn]]) + 4
 
-    # find out if interaction is BB or SC
-    other_chain = parsed.select('not (chain {})'.format(resi[0], resi[1:]))
-    polar = ['O', 'N']
-    interacting_atoms = []
-    for atom in target:
-        radius = 3.5
-        if atom.getName()[0] in polar:
+    # make sure that the target res doesn't have a segment id
+    # or anything funky or missing density
+    if len(target) != len(constants.AA_sc_dict[constants.one_to_three[resn]]) + 4:
+        print('Find out why there are missing or extra atoms in the prody res sele!')
+    else: 
+        # find out if interaction is BB or SC
+        other_chain = parsed.select('not (chain {})'.format(resi[0], resi[1:]))
+        polar = ['O', 'N']
+        interacting_atoms = []
+        for atom in target:
             radius = 3.5
-        else:
-            radius = 4.8
-        for nbr in pr.findNeighbors(atom, radius, other_chain):
-            ifgatom, vdmatom, dist = nbr
-            ifgindex, vdmindex = ifgatom.getIndex(), vdmatom.getIndex()
-            ifgatomelem, vdmatomelem = ifgatom.getName(), vdmatom.getName()
-            if ifgatom.getElement() != 'H' and vdmatom.getElement() != 'H':
-                if dist <= 3.5:
-                    interacting_atoms.append((ifgindex, vdmindex))
-                else:
-                    if ifgatomelem[0] == 'C' and vdmatomelem[0] == 'C':
+            if atom.getName()[0] in polar:
+                radius = 3.5
+            else:
+                radius = 4.8
+            for nbr in pr.findNeighbors(atom, radius, other_chain):
+                ifgatom, vdmatom, dist = nbr
+                ifgindex, vdmindex = ifgatom.getIndex(), vdmatom.getIndex()
+                ifgatomelem, vdmatomelem = ifgatom.getName(), vdmatom.getName()
+                if ifgatom.getElement() != 'H' and vdmatom.getElement() != 'H':
+                    if dist <= 3.5:
                         interacting_atoms.append((ifgindex, vdmindex))
-    return list(set(interacting_atoms))
-
+                    else:
+                        if ifgatomelem[0] == 'C' and vdmatomelem[0] == 'C':
+                            interacting_atoms.append((ifgindex, vdmindex))
+        return list(set(interacting_atoms))
 
 def get_ifg_vdm(
         parsed,
@@ -100,6 +102,7 @@ def get_ifg_vdm(
         for typ in possible_ifgatoms:
             for element in typ:
                 element = element.split(' ')
+                # if element has more atoms in ifgcontactatoms than current %ifgatoms%:
                 if len(
                     set(element).intersection(
                         set(ifgcontactatoms))) > len(
@@ -141,56 +144,101 @@ def get_ifg_vdm(
     ifgtype = assign(ifgatoms, ifgresn)
     vdmtype = assign(vdmatoms, vdmresn)
 
+    bb = ['C', 'O', 'CA', 'N']
+    if ifgatoms == '' and set(ifgcontactatoms).issubset(bb) \
+        and method == 'planar_group_no_bb':
+        pass
+    elif ifgatoms == '' or vdmatoms == '':
+        print('Investigate why %ifgatoms% or %vdmatoms% is empty!')
+
     return ifgtype, vdmtype, ifginfo, vdminfo
 
 
 def only_contacting(row, ifgatoms, vdmatoms):
-    dist = row['dist_info']
-    dist = dist.lstrip('(')
-    dist = dist.rstrip(')')
-    dist = dist.split(') (')
-    dist = [x.split(' ') for x in dist]
-    for elem in dist:
-        if elem[0] in ifgatoms and elem[1] in vdmatoms:
+    con = row['probe_contact_pairs']
+    con = con.lstrip('(')
+    con = con.rstrip(')')
+    con = con.split(') (')
+    con = [x.split(' ') for x in con]
+    for elem in con:
+        if elem[0] in ifgatoms and elem[1] in vdmatoms and elem[2] != 'wc':
             return True
     return False
 
-#def filter_buried():
-#    sdf
-#
-#def filter_membrane():
-#
+def filter_buried(csv, threecode):
+    ''' choosing arbitrary min. convex hull dist of 3A 
+    as cutoff to define buried vs exposed ifgs/vdms'''
+    ifgsasa = pd.read_csv(
+            '/home/gpu/Sophia/combs/st_wd/20180626_combed_csvs/{}/{}_ifg_atom_density.csv'.
+            format(threecode, threecode))[['iFG_count', 'min_hull_dist_CB_CA']]
+    ifgsasa.rename(columns={'min_hull_dist_CB_CA': 'iFG_min_hull_dist'}, inplace=True)
+    vdmsasa = pd.read_csv(
+            '/home/gpu/Sophia/combs/st_wd/20180626_combed_csvs/{}/{}_vdm_sasa_info.csv'.
+            format(threecode, threecode))[['iFG_count', 'vdM_count', 'min_hull_dist_CB_CA']]
+    vdmsasa.rename(columns={'min_hull_dist_CB_CA': 'vdM_min_hull_dist'}, inplace=True)
 
-def filter_contact(ifgresn, vdmresn, ifgatoms, vdmatoms):
-    ''' Keep only the vdM rows where the ifgs and vdms are
-    interacting through ifgatoms and vdmatoms '''
+    print(len(csv), 'with solvent exposed')
+    csv = pd.merge(csv, ifgsasa, on=['iFG_count'], left_index=True)
+    csv = pd.merge(csv, vdmsasa, on=['iFG_count', 'vdM_count'],left_index=True)
+    csv = csv[csv['iFG_min_hull_dist'] > 3]
+    csv = csv[csv['vdM_min_hull_dist'] > 3]
+    print(len(csv), 'only buried')
+    return csv
+
+def filter_membrane(csv, threecode):
+    print(len(csv), 'including membrane proteins')
+    
+    membrane = []
+    with open('/home/gpu/Sophia/combs/st_wd/Lookups/opm_entries.txt') as inF:
+        for line in inF:
+            membrane.append(line.strip())
+
+    csv = csv[~csv['pdb'].isin(membrane)]
+    print(len(csv), 'without membrane proteins')
+    return csv
+    
+
+def filter_contact(ifgresn, vdmresn, ifgatoms, vdmatoms, 
+    exclude_membrane, exclude_exposed):
+    '''Find out which are the vdM rows where the ifgs and vdms are interacting 
+    through ifgatoms and vdmatoms. Exclude probe contact type 'wc'.
+    Returns both filtered and unfiltered df'''
 
     threecode = constants.AAname[ifgresn]
     csv = pd.read_csv(
-            '/home/gpu/Sophia/combs/st_wd/20180207_combed_csvs/{}/{}_ifg_contact_vdm.csv'.
-            format(threecode, threecode))
+            '/home/gpu/Sophia/combs/st_wd/20180626_combed_csvs/{}/{}_ifg_contact_vdm.csv'.
+            format(threecode, threecode))[['iFG_count', 'vdM_count', 'ifg_probe_contacts', 'probe_contact_pairs']]
+    
     vdmpdbinfo = pkl.load(
         open(
         '/home/gpu/Sophia/combs/st_wd/Lookups/refinedvdms/vdms_of_{}.pkl'.
         format(threecode),'rb'))
-    print(len(vdmpdbinfo), threecode)
     csv = pd.merge(csv, vdmpdbinfo, left_index=True, right_index=True)
     csv = csv[csv['resname_vdm'] == vdmresn]
+    
+    if exclude_membrane==True:
+        csv = filter_membrane(csv, threecode)
+
+    if exclude_exposed==True:
+        csv = filter_buried(csv, threecode)
+    
     num_all_vdms = len(csv) 
-    print(num_all_vdms, 'num all vdms')
+    unfiltered_df = csv
     csv['in_contact'] = csv.apply(
         only_contacting,
         ifgatoms=ifgatoms,
         vdmatoms=vdmatoms,
         axis=1)
     csv = csv[csv['in_contact']]
-    print(len(csv), 'direct')
-    return num_all_vdms, csv  # which is actually a pandas df
+    num_direct = len(csv)
+    return num_all_vdms, num_direct, unfiltered_df, \
+        csv # csv is just filtered  pandas df
 
 def flip(atom_ls, resn):
     # account for flipped residues
     ls = []
     ls.append(atom_ls)
+    resn = constants.AAname[resn]
     if resn in constants.flip_names:
         copyls = atom_ls.copy()
         for ix, atom in enumerate(atom_ls):
@@ -222,7 +270,8 @@ def get_order_of_atoms(item, ifgresn, vdmresn, ifgls, vdmls):
 
 def score_interaction_and_dump(
         parsed, ifgresn, vdmresn, ifg_contact_atoms, vdm_contact_atoms,
-        method, targetresi, cutoff, pdbix=None, pdbname=None, output_pdb=False):
+        method, targetresi, cutoff, pdbix=None, pdbname=None, output_pdb=False,
+        non_membrane=False, buried=False):
 
     cutoff = float(cutoff)
     ifgtype, vdmtype, ifginfo, vdminfo = get_ifg_vdm(
@@ -233,20 +282,21 @@ def score_interaction_and_dump(
     ifgatoms = ifgtype[1]
     vdmatoms = vdmtype[1]
     
-    if ifgtype[1] == None or vdmtype[1] == None:
-        print('Investigate why %ifgatoms% or %vdmatoms% is empty!')
+    if ifgatoms == '' or vdmatoms == '':
+        pass # probably has bb atoms only
     elif set(ifgatoms).issubset(set(constants.atoms_dict[ifgresn])) and set(
         vdmatoms).issubset(set(constants.atoms_dict[vdmresn])):
 
-        # Filter for only combed %vdmresn% vdms of ifgresn. And then keep only
+        # To normalize the # of geom matches, count only combed %vdmresn% 
+        # vdms of ifgresn. And then keep only
         # the combed vdms whose %vdmatoms% are directly involved in the combed 
         # interaction. (Reminder: %vdmatoms% are determined from the 
         # target/query structure.) This process is to disregard, for example, 
         # combed vdms interacting through its bb residues if the target 
         # structure (and therefore, %vdmatoms%) don't have interacting bb residues
-        num_all_vdms, lookupdf = filter_contact(
-            ifgresn, vdmresn, ifgatoms, vdmatoms)
-        print(len(lookupdf), 'len lookupdf')
+        num_all_vdms, num_direct, lookupdf, filtered_df = filter_contact(
+            ifgresn, vdmresn, ifgatoms, vdmatoms, exclude_membrane=non_membrane,
+            exclude_exposed=buried)
         query = []
         for atom in ifgatoms:
             query.append(
@@ -272,10 +322,12 @@ def score_interaction_and_dump(
         vdmlists = flip(vdmatoms, vdmresn)
         rmsds = []
         num_atoms = len(query)
-        # keep only the coords for vdms in the filtered lookupdf
+        # I forgot, but len(item)==2 if there's a problem w/ extract_coords?
+        # Also, only keep the coords if the vdm is in lookupdf
         coords_ls = [
-            item for item in lookupcoords if (item[0] in lookupdf.index
-            and len(item)==3)]
+            item for item in lookupcoords if (item[0] in lookupdf.index 
+                and len(item)==3)]
+            
         lookupatoms_to_clus = []
         counter = 0 # to keep count of how many pdbs are being output
         for item in coords_ls:
@@ -288,17 +340,17 @@ def score_interaction_and_dump(
                     moved, transf = pr.superpose(lookupatoms, query)
                     temp_rmsd = pr.calcRMSD(moved, query)
                     compare_rmsds.append(temp_rmsd)
-                    ifg_vdm_ind.append([moved, temp_rmsd])
+                    ifg_vdm_ind.append([moved, transf, temp_rmsd])
             # item[0] is df index
             rmsds.append([item[0], min(compare_rmsds)])
             # get index of which one had min rmsd
             for which_ind, each in enumerate(ifg_vdm_ind):
-                if each[1] == min(compare_rmsds):
+                if each[2] == min(compare_rmsds):
                     lookupatoms_to_clus.append(each[0])
                     ######################################################################## 
                     #                   output pdb if low rmsd 
                     ######################################################################## 
-                    if each[1] < cutoff and counter < 30 and which_ind==0 and output_pdb==True: 
+                    if each[2] < cutoff and counter < 30 and which_ind==0 and output_pdb==True: 
                         # this is to ensure rmsd is below cutoff when not flipped
                         # bc don't want to take care of that in prody to output pdb
                         row = lookupdf.loc[item[0]]
@@ -313,8 +365,8 @@ def score_interaction_and_dump(
                         printout = printout.select(
                             '(chain {} and segment {} and resnum {}) or (chain {} and segment {} and resnum {})'.format(
                             ifgchid,ifgseg,ifgresnum,vdmchid,vdmseg,vdmresnum))
-                        printout.select('chain {} and resnum {}'.format(ifgchid,ifgresnum)).setChids('Y')
-                        printout.select('chain {} and resnum {}'.format(vdmchid,vdmresnum)).setChids('X')
+                        printout.select('chain {} and segment {} and resnum {}'.format(ifgchid,ifgseg,ifgresnum)).setChids('Y')
+                        printout.select('chain {} and segment {} and resnum {}'.format(vdmchid,vdmseg,vdmresnum)).setChids('X')
                         printout.select('all').setResnums(10)
                         printout_interactamer = []
                         integrin_interactamer = []
@@ -330,19 +382,19 @@ def score_interaction_and_dump(
                         printout_interactamer = sum(printout_interactamer[1:], printout_interactamer[0])
                         try:
                             assert len(integrin_interactamer) == len(printout_interactamer)
-                            interactamer_transf = pr.applyTransformation(transf, printout_interactamer)
+                            interactamer_transf = pr.applyTransformation(each[1], printout_interactamer)
                             outdir = './output_data/pdbfiles/'
                             threecode = constants.AAname[ifgresn]
                             if pdbix != None and pdbname != None:
-                                pr.writePDB(outdir+'{}_{}_{}_{}{}_{}{}_{}_{}'.format(
+                                pr.writePDB(outdir+'{}_{}_{}_{}{}_{}{}_{}_{}_{}'.format(
                                     pdbix, pdbname, targetresi,ifginfo[1],
                                     ifgresn,vdminfo[1],vdmresn,cutoff,
-                                    row.name), interactamer_transf)
+                                    row.name, method), interactamer_transf)
                             else: 
-                                pr.writePDB(outdir+'{}_{}{}_{}{}_{}_{}'.format(
+                                pr.writePDB(outdir+'{}_{}{}_{}{}_{}_{}_{}'.format(
                                     targetresi,ifginfo[1],
                                     ifgresn,vdminfo[1],vdmresn,cutoff,
-                                    row.name), interactamer_transf)
+                                    row.name, method), interactamer_transf)
                             counter += 1
                         except:
                             traceback.print_exc()
@@ -350,11 +402,11 @@ def score_interaction_and_dump(
 
         # count how many NNs the query intrxn has
         num_nn, norm_metrics = get_NN(lookupatoms_to_clus, 
-            num_atoms, rmsds, query, cutoff, num_all_vdms)
+            num_atoms, rmsds, query, cutoff, num_all_vdms, num_direct)
         return ifginfo[0], ifginfo[1], ifgresn, vdminfo[0], vdminfo[1],\
             vdmresn, ifgatoms, vdmatoms, num_nn, norm_metrics
 
-def get_NN(lookupatoms_to_clus, num_atoms, rmsds, query, cutoff, num_all_vdms):
+def get_NN(lookupatoms_to_clus, num_atoms, rmsds, query, cutoff, num_all_vdms, num_direct):
     flat = [x.reshape(-1,) for x in lookupatoms_to_clus]
     euclid_dist = cutoff * np.sqrt(num_atoms)
     nbrs = NearestNeighbors(
@@ -383,7 +435,7 @@ def get_NN(lookupatoms_to_clus, num_atoms, rmsds, query, cutoff, num_all_vdms):
     
     norm_metrics = [] 
     norm_metrics.append(num_all_vdms)
-    norm_metrics.append(len(flat))
+    norm_metrics.append(num_direct)
     NNs = []
     for coord in flat:
         coord = coord.reshape (1,-1)
