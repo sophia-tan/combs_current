@@ -1,0 +1,13 @@
+core.init: Rosetta version unknown:f9445c2b156dec8e88f4eee1694cad670bd44668 2017-10-24 10:24:07 -0700 from git@github.com:RosettaCommons/main.git
+core.init: command: /netapp/home/xingjiepan/Rosetta/main/source/bin/rosetta_scripts.default.linuxgccrelease -s /netapp/home/skt/Integrin_part_o/inputs/3FCSB1527/clean_pymolintegrin.pdb -parser:protocol /netapp/home/skt/Integrin_part_o/ddG-backrub.xml -parser:script_vars chainstomove=B mutate_resfile_relpath=/netapp/home/skt/Integrin_part_o/inputs/3FCSB1527/nataa_mutations.resfile number_backrub_trials=35000 max_minimization_iter=5000 abs_score_convergence_thresh=1.0 backrub_trajectory_stride=35000 -restore_talaris_behavior -in:file:fullatom -ignore_unrecognized_res -ignore_zero_occupancy false -ex1 -ex2
+core.init: 'RNG device' seed mode, using '/dev/urandom', seed=-178730351 seed_offset=0 real_seed=-178730351
+core.init.random: RandomGenerator:init: Normal mode, seed=-178730351 RG_type=mt19937
+core.init: Resolved executable path: /netapp/home/xingjiepan/Rosetta/main_new/source/build/src/release/linux/2.6/64/x86/gcc/5.3/default/rosetta_scripts.default.linuxgccrelease
+core.init: Looking for database based on location of executable: /netapp/home/xingjiepan/Rosetta/main_new/database/
+protocols.jd2.PDBJobInputter: Instantiate PDBJobInputter
+protocols.jd2.PDBJobInputter: PDBJobInputter::fill_jobs
+protocols.jd2.PDBJobInputter: pushed /netapp/home/skt/Integrin_part_o/inputs/3FCSB1527/clean_pymolintegrin.pdb nstruct index 1
+protocols.evaluation.ChiWellRmsdEvaluatorCreator: Evaluation Creator active ... 
+protocols.jd2.JobDistributor: no more batches to process... 
+protocols.jd2.JobDistributor: 1 jobs considered, 0 jobs attempted in 0 seconds
+protocols.jd2.JobDistributor: no jobs were attempted, did you forget to pass -overwrite?
