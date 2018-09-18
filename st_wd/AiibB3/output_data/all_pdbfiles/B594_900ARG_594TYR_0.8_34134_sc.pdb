@@ -1,0 +1,16 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...nd resnum 142))') + (Selection '(chain Y and re...nd resnum 142))')) + (Selection '(chain Y and re...nd resnum 142))')) + (Selection '(chain Y and re...nd resnum 142))')) + (Selection '(chain Y and re...nd resnum 142))')) + (Selection '(chain Y and re...nd resnum 142))')) + (Selection '(chain Y and re...nd resnum 142))')) + (Selection '(chain X and re...nd resnum 142))')) + (Selection '(chain X and re...nd resnum 142))')) + (Selection '(chain X and re...nd resnum 142))')) + (Selection '(chain X and re...nd resnum 142))')) + (Selection '(chain X and re...nd resnum 142))')) + (Selection '(chain X and re...nd resnum 142))')) + (Selection '(chain X and re...nd resnum 142))')) + (Selection '(chain X and re...nd resnum 142))')
+ATOM      1  CB  ARG Y  10     -49.307 -66.024-100.110  1.00 40.93         A C
+ATOM      2  CG  ARG Y  10     -48.541 -65.712 -98.821  1.00 42.31         A C
+ATOM      3  CD  ARG Y  10     -47.370 -66.603 -98.531  1.00 43.61         A C
+ATOM      4  NE  ARG Y  10     -46.866 -66.368 -97.174  1.00 45.63         A N
+ATOM      5  CZ  ARG Y  10     -45.740 -66.890 -96.687  1.00 47.41         A C
+ATOM      6  NH1 ARG Y  10     -44.979 -67.652 -97.456  1.00 48.14         A N
+ATOM      7  NH2 ARG Y  10     -45.379 -66.652 -95.432  1.00 47.33         A N
+ATOM      8  CB ATYR X  10     -47.548 -69.314 -94.526  0.50 33.18         B C
+ATOM      9  CG ATYR X  10     -48.146 -69.549 -95.861  0.50 33.10         B C
+ATOM     10  CD1ATYR X  10     -47.388 -70.090 -96.916  0.50 33.45         B C
+ATOM     11  CD2ATYR X  10     -49.458 -69.191 -96.118  0.50 33.04         B C
+ATOM     12  CE1ATYR X  10     -47.951 -70.286 -98.164  0.50 31.71         B C
+ATOM     13  CE2ATYR X  10     -50.018 -69.387 -97.326  0.50 31.72         B C
+ATOM     14  CZ ATYR X  10     -49.272 -69.922 -98.360  0.50 34.25         B C
+ATOM     15  OH ATYR X  10     -49.916 -70.085 -99.563  0.50 32.82         B O

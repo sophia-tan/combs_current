@@ -1,0 +1,16 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...nd resnum 106))') + (Selection '(chain Y and re...nd resnum 106))')) + (Selection '(chain Y and re...nd resnum 106))')) + (Selection '(chain Y and re...nd resnum 106))')) + (Selection '(chain Y and re...nd resnum 106))')) + (Selection '(chain Y and re...nd resnum 106))')) + (Selection '(chain Y and re...nd resnum 106))')) + (Selection '(chain Y and re...nd resnum 106))')) + (Selection '(chain X and re...nd resnum 106))')) + (Selection '(chain X and re...nd resnum 106))')) + (Selection '(chain X and re...nd resnum 106))')) + (Selection '(chain X and re...nd resnum 106))')) + (Selection '(chain X and re...nd resnum 106))')) + (Selection '(chain X and re...nd resnum 106))')) + (Selection '(chain X and re...nd resnum 106))')
+ATOM      1  CB ATYR Y  10     -38.429 -62.385 -68.602  0.54 13.15         A C
+ATOM      2  CG ATYR Y  10     -37.809 -61.151 -67.994  0.54 13.46         A C
+ATOM      3  CD1ATYR Y  10     -38.324 -59.891 -68.269  0.54 14.53         A C
+ATOM      4  CD2ATYR Y  10     -36.746 -61.248 -67.112  0.54 12.95         A C
+ATOM      5  CE1ATYR Y  10     -37.779 -58.753 -67.700  0.54 16.27         A C
+ATOM      6  CE2ATYR Y  10     -36.190 -60.114 -66.540  0.54 14.02         A C
+ATOM      7  CZ ATYR Y  10     -36.711 -58.873 -66.840  0.54 15.33         A C
+ATOM      8  OH ATYR Y  10     -36.161 -57.745 -66.275  0.54 15.74         A O
+ATOM      9  CB  ARG X  10     -32.721 -53.191 -62.331  1.00 11.45         A C
+ATOM     10  CG  ARG X  10     -33.600 -54.226 -63.010  1.00 12.22         A C
+ATOM     11  CD  ARG X  10     -35.006 -54.084 -62.458  1.00 14.23         A C
+ATOM     12  NE  ARG X  10     -35.981 -55.010 -63.030  1.00 16.48         A N
+ATOM     13  CZ  ARG X  10     -36.277 -56.206 -62.527  1.00 14.08         A C
+ATOM     14  NH1 ARG X  10     -35.644 -56.673 -61.461  1.00 13.84         A N
+ATOM     15  NH2 ARG X  10     -37.214 -56.945 -63.112  1.00 16.06         A N

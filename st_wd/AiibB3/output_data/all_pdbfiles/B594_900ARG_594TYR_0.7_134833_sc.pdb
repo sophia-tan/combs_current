@@ -1,0 +1,16 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...nd resnum 600))') + (Selection '(chain Y and re...nd resnum 600))')) + (Selection '(chain Y and re...nd resnum 600))')) + (Selection '(chain Y and re...nd resnum 600))')) + (Selection '(chain Y and re...nd resnum 600))')) + (Selection '(chain Y and re...nd resnum 600))')) + (Selection '(chain Y and re...nd resnum 600))')) + (Selection '(chain X and re...nd resnum 600))')) + (Selection '(chain X and re...nd resnum 600))')) + (Selection '(chain X and re...nd resnum 600))')) + (Selection '(chain X and re...nd resnum 600))')) + (Selection '(chain X and re...nd resnum 600))')) + (Selection '(chain X and re...nd resnum 600))')) + (Selection '(chain X and re...nd resnum 600))')) + (Selection '(chain X and re...nd resnum 600))')
+ATOM      1  CB AARG Y  10     -49.372 -65.155 -99.697  0.65 17.51         A C
+ATOM      2  CG AARG Y  10     -48.585 -66.296 -98.977  0.65 17.18         A C
+ATOM      3  CD AARG Y  10     -47.045 -66.118 -99.076  0.65 19.31         A C
+ATOM      4  NE AARG Y  10     -46.260 -67.040 -98.225  0.65 17.96         A N
+ATOM      5  CZ AARG Y  10     -45.982 -66.896 -96.921  0.65 19.19         A C
+ATOM      6  NH1AARG Y  10     -46.438 -65.873 -96.202  0.65 17.65         A N
+ATOM      7  NH2AARG Y  10     -45.235 -67.815 -96.312  0.65 19.47         A N
+ATOM      8  CB  TYR X  10     -47.349 -70.010 -94.331  1.00 14.69         A C
+ATOM      9  CG  TYR X  10     -48.002 -69.887 -95.714  1.00 15.65         A C
+ATOM     10  CD1 TYR X  10     -49.269 -69.317 -95.851  1.00 17.38         A C
+ATOM     11  CD2 TYR X  10     -47.360 -70.387 -96.856  1.00 16.73         A C
+ATOM     12  CE1 TYR X  10     -49.893 -69.233 -97.097  1.00 18.60         A C
+ATOM     13  CE2 TYR X  10     -47.977 -70.314 -98.110  1.00 19.43         A C
+ATOM     14  CZ  TYR X  10     -49.242 -69.731 -98.218  1.00 19.36         A C
+ATOM     15  OH  TYR X  10     -49.871 -69.653 -99.457  1.00 20.84         A O

@@ -1,0 +1,13 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...and resnum 52))') + (Selection '(chain Y and re...and resnum 52))')) + (Selection '(chain Y and re...and resnum 52))')) + (Selection '(chain Y and re...and resnum 52))')) + (Selection '(chain Y and re...and resnum 52))')) + (Selection '(chain Y and re...and resnum 52))')) + (Selection '(chain Y and re...and resnum 52))')) + (Selection '(chain X and re...and resnum 52))')) + (Selection '(chain X and re...and resnum 52))')) + (Selection '(chain X and re...and resnum 52))')) + (Selection '(chain X and re...and resnum 52))')) + (Selection '(chain X and re...and resnum 52))')
+ATOM      1  CB  ARG Y  10     -59.245 -52.929 -63.396  1.00 21.26         A C
+ATOM      2  CG  ARG Y  10     -58.008 -53.512 -63.988  1.00 25.42         A C
+ATOM      3  CD  ARG Y  10     -58.214 -54.950 -64.499  1.00 30.08         A C
+ATOM      4  NE  ARG Y  10     -56.916 -55.471 -64.931  1.00 32.13         A N
+ATOM      5  CZ  ARG Y  10     -55.909 -55.715 -64.091  1.00 34.92         A C
+ATOM      6  NH1 ARG Y  10     -56.077 -55.551 -62.749  1.00 34.17         A N
+ATOM      7  NH2 ARG Y  10     -54.744 -56.159 -64.578  1.00 30.31         A N
+ATOM      8  CB  GLU X  10     -51.475 -59.200 -66.364  1.00 22.18         A C
+ATOM      9  CG  GLU X  10     -52.941 -59.354 -66.094  1.00 26.36         A C
+ATOM     10  CD  GLU X  10     -53.254 -60.259 -64.915  1.00 28.07         A C
+ATOM     11  OE1 GLU X  10     -53.070 -59.860 -63.744  1.00 36.75         A O
+ATOM     12  OE2 GLU X  10     -53.755 -61.373 -65.174  1.00 37.89         A O

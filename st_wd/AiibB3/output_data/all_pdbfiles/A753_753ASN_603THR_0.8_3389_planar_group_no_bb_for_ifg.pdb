@@ -1,0 +1,8 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...d resnum 2022))') + (Selection '(chain Y and re...d resnum 2022))')) + (Selection '(chain Y and re...d resnum 2022))')) + (Selection '(chain Y and re...d resnum 2022))')) + (Selection '(chain X and re...d resnum 2022))')) + (Selection '(chain X and re...d resnum 2022))')) + (Selection '(chain X and re...d resnum 2022))')
+ATOM      1  CB  ASN Y  10     -40.856 -75.498-106.495  1.00  7.61         A C
+ATOM      2  CG  ASN Y  10     -39.631 -76.202-105.984  1.00  7.36         A C
+ATOM      3  ND2 ASN Y  10     -39.511 -76.404-104.656  1.00  8.03         A N
+ATOM      4  OD1 ASN Y  10     -38.739 -76.570-106.773  1.00  8.20         A O
+ATOM      5  CA  THR X  10     -44.062 -74.396-102.823  1.00  6.61         A C
+ATOM      6  C   THR X  10     -42.540 -74.357-103.021  1.00  7.07         A C
+ATOM      7  O   THR X  10     -41.888 -75.415-103.106  1.00  7.37         A O

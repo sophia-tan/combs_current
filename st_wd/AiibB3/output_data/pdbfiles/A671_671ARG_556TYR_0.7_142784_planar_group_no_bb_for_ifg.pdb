@@ -1,0 +1,12 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...and resnum 64))') + (Selection '(chain Y and re...and resnum 64))')) + (Selection '(chain Y and re...and resnum 64))')) + (Selection '(chain Y and re...and resnum 64))')) + (Selection '(chain X and re...and resnum 64))')) + (Selection '(chain X and re...and resnum 64))')) + (Selection '(chain X and re...and resnum 64))')) + (Selection '(chain X and re...and resnum 64))')) + (Selection '(chain X and re...and resnum 64))')) + (Selection '(chain X and re...and resnum 64))')) + (Selection '(chain X and re...and resnum 64))')
+ATOM      1  NE  ARG Y  10     -35.357 -55.928 -63.572  1.00 19.43         A N
+ATOM      2  CZ  ARG Y  10     -36.037 -56.806 -62.815  1.00 20.76         A C
+ATOM      3  NH1 ARG Y  10     -37.380 -56.791 -62.761  1.00 19.25         A N
+ATOM      4  NH2 ARG Y  10     -35.372 -57.692 -62.087  1.00 19.49         A N
+ATOM      5  CG  TYR X  10     -37.731 -61.065 -67.652  1.00 19.05         A C
+ATOM      6  CD1 TYR X  10     -37.279 -60.977 -66.331  1.00 20.58         A C
+ATOM      7  CD2 TYR X  10     -37.745 -59.901 -68.439  1.00 20.39         A C
+ATOM      8  CE1 TYR X  10     -36.852 -59.732 -65.804  1.00 23.33         A C
+ATOM      9  CE2 TYR X  10     -37.314 -58.651 -67.914  1.00 22.43         A C
+ATOM     10  CZ  TYR X  10     -36.866 -58.600 -66.594  1.00 22.95         A C
+ATOM     11  OH  TYR X  10     -36.452 -57.402 -66.031  1.00 27.25         A O

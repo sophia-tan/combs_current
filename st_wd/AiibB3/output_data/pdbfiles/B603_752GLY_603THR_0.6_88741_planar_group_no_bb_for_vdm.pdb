@@ -1,0 +1,7 @@
+REMARK AtomMap (AtomMap (AtomMap (AtomMap (AtomMap (Selection '(chain Y and re...nd resnum 647))') + (Selection '(chain Y and re...nd resnum 647))')) + (Selection '(chain Y and re...nd resnum 647))')) + (Selection '(chain X and re...nd resnum 647))')) + (Selection '(chain X and re...nd resnum 647))')) + (Selection '(chain X and re...nd resnum 647))')
+ATOM      1  N   GLY Y  10     -39.522 -70.525-106.621  1.00 18.26         A N
+ATOM      2  CA  GLY Y  10     -39.888 -71.323-107.791  1.00 17.56         A C
+ATOM      3  C   GLY Y  10     -40.668 -72.530-107.318  1.00 18.37         A C
+ATOM      4  CG2 THR X  10     -44.210 -72.337-103.972  1.00 17.18         A C
+ATOM      5  CB  THR X  10     -42.788 -72.513-103.448  1.00 16.59         A C
+ATOM      6  OG1 THR X  10     -42.754 -72.122-102.071  1.00 17.35         A O
