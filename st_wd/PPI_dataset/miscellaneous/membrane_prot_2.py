@@ -1,9 +1,9 @@
+from out import out
 opm = []
 combs_db = []
 
-with open('opm_entries.txt', 'r') as inF:
-    for line in inF:
-        opm.append(line.strip())
+for o in out:
+    opm.append(o)
 
 with open('combs_database.txt', 'r') as infile:
     for line in infile:

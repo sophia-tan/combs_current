@@ -40,5 +40,5 @@ def generate_data_df(rows):
         ala_mut = [True if (m[1][-1]=='A') else False for m in mut]
         if False not in ala_mut: # all combo mutations are to ala
             list_for_df.append(
-                pd.Series([mut,ddg],index=['Mutation','ddG']))
+                pd.Series([mut,ddg],index=['Mutation','expt val']))
     return pd.DataFrame(list_for_df)

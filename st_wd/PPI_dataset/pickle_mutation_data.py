@@ -18,4 +18,4 @@ for pdbID, rows in grouped:
     datadf_list.append(data_df)
 
 pkl.dump([resdicts_list, datadf_list], 
-    open('mutation_data.pkl','wb'))
+    open('experimental_data_PPI_dataset.pkl','wb'))
